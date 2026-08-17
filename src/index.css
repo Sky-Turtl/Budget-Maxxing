@@ -605,16 +605,41 @@ tbody tr:hover {
 }
 
 .notes-cell {
-  color: transparent;
-  transition: color 0.1s ease;
-}
-
-.notes-cell:hover {
-  color: var(--ink);
-}
-
-.purchase-cancelled .notes-cell:hover {
   color: var(--ink-faint);
+}
+
+.notes-tooltip {
+  position: relative;
+  display: inline-block;
+  max-width: 9rem;
+  vertical-align: bottom;
+  cursor: default;
+}
+
+.notes-truncate {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.notes-tooltip:hover::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  left: 0;
+  bottom: 100%;
+  margin-bottom: 0.4rem;
+  background: var(--ink);
+  color: var(--paper);
+  padding: 0.5rem 0.7rem;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  font-weight: 400;
+  white-space: normal;
+  width: max-content;
+  max-width: 18rem;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+  z-index: 10;
 }
 
 .purchase-cancelled td {
