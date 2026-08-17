@@ -32,33 +32,43 @@ export function SubscriptionsPage() {
       />
 
       <form onSubmit={handleSubmit}>
-        <input placeholder="Name" value={name} onChange={(e) => setName(e.target.value)} />
-        <input
-          type="number"
-          min={0}
-          step={0.01}
-          placeholder="Amount"
-          value={amount || ''}
-          onChange={(e) => setAmount(Number(e.target.value))}
-        />
-        <input
-          type="number"
-          min={1}
-          max={31}
-          placeholder="Billing day"
-          value={billingDate}
-          onChange={(e) => setBillingDate(Number(e.target.value))}
-        />
-        <select value={categoryId} onChange={(e) => setCategoryId(e.target.value)}>
-          <option value="" disabled>
-            Category
-          </option>
-          {activeCategories.map((c) => (
-            <option key={c.id} value={c.id}>
-              {c.name}
+        <label>
+          Name
+          <input value={name} onChange={(e) => setName(e.target.value)} />
+        </label>
+        <label>
+          Amount
+          <input
+            type="number"
+            min={0}
+            step={0.01}
+            value={amount || ''}
+            onChange={(e) => setAmount(Number(e.target.value))}
+          />
+        </label>
+        <label>
+          Billing day
+          <input
+            type="number"
+            min={1}
+            max={31}
+            value={billingDate}
+            onChange={(e) => setBillingDate(Number(e.target.value))}
+          />
+        </label>
+        <label>
+          Category
+          <select value={categoryId} onChange={(e) => setCategoryId(e.target.value)}>
+            <option value="" disabled>
+              Select
             </option>
-          ))}
-        </select>
+            {activeCategories.map((c) => (
+              <option key={c.id} value={c.id}>
+                {c.name}
+              </option>
+            ))}
+          </select>
+        </label>
         <button type="submit">Add subscription</button>
       </form>
 
