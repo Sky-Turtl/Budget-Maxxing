@@ -1,5 +1,11 @@
 import type { Purchase, Subscription } from '../../types/models';
 
+/** Parses a "YYYY-MM-DD" date-only string as local midnight, not UTC midnight. */
+function parseLocalDate(isoDate: string): Date {
+  const [year, month, day] = isoDate.split('-').map(Number);
+  return new Date(year, month - 1, day);
+}
+
 /**
  * Sums purchases + lazily-resolved active subscriptions billed within [monthStart, monthEnd)
  * for a given category. Subscriptions are never written as synthetic purchase docs — their
@@ -15,7 +21,7 @@ export function computeMonthSpend(
   const purchaseTotal = purchases
     .filter((p) => p.categoryId === categoryId && !p.cancelled)
     .filter((p) => {
-      const d = new Date(p.date);
+      const d = parseLocalDate(p.date);
       return d >= monthStart && d < monthEnd;
     })
     .reduce((sum, p) => sum + p.amount, 0);

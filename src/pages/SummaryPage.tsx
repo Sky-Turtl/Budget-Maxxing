@@ -48,7 +48,13 @@ export function SummaryPage() {
   const monthlyTakeHome = annualTakeHome / 12;
   const annualInvested = paycheck.total401k + (allocations?.rothIRA ?? 0);
   const monthlyInvested = annualInvested / 12;
-  const totalIncludingInvestments = annualTakeHome + annualInvested;
+
+  const monthlySubscriptionsTotal = subscriptions
+    .filter((s) => s.active)
+    .reduce((sum, s) => sum + s.amount, 0);
+  const annualSubscriptionsTotal = monthlySubscriptionsTotal * 12;
+
+  const totalIncludingInvestments = annualTakeHome + annualInvested - annualSubscriptionsTotal;
 
   const now = new Date();
   const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
@@ -94,8 +100,16 @@ export function SummaryPage() {
           <span className="stat-label">Annual invested</span>
           <Money className="stat-figure" value={annualInvested} />
         </div>
+        <div className="stat-block">
+          <span className="stat-label">Monthly subscriptions</span>
+          <Money className="stat-figure" value={-monthlySubscriptionsTotal} />
+        </div>
+        <div className="stat-block">
+          <span className="stat-label">Annual subscriptions</span>
+          <Money className="stat-figure" value={-annualSubscriptionsTotal} />
+        </div>
         <div className="stat-block stat-block-wide">
-          <span className="stat-label">Total including investments</span>
+          <span className="stat-label">Total including investments (after subscriptions)</span>
           <Money className="stat-figure stat-figure-lg" value={totalIncludingInvestments} />
         </div>
       </section>
