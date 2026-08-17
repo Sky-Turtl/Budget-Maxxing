@@ -75,5 +75,6 @@ export interface Purchase {
   categoryId: string;
   location: string;
   notes?: string;
+  cancelled?: boolean;
   createdAt: number;
 }

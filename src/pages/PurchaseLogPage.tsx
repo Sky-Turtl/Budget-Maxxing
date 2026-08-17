@@ -9,7 +9,7 @@ function todayISO() {
 }
 
 export function PurchaseLogPage() {
-  const { purchases, loading, addPurchase } = usePurchases();
+  const { purchases, loading, addPurchase, updatePurchase } = usePurchases();
   const { categories } = useBudgetCategories();
   const [date, setDate] = useState(todayISO());
   const [amount, setAmount] = useState(0);
@@ -87,16 +87,27 @@ export function PurchaseLogPage() {
             <th>Category</th>
             <th>Location</th>
             <th>Notes</th>
+            <th></th>
           </tr>
         </thead>
         <tbody>
           {recent.map((p) => (
-            <tr key={p.id}>
+            <tr key={p.id} className={p.cancelled ? 'purchase-cancelled' : undefined}>
               <td>{p.date}</td>
               <td>{formatMoney(p.amount)}</td>
               <td>{categories.find((c) => c.id === p.categoryId)?.name ?? 'Unknown'}</td>
               <td>{p.location}</td>
               <td>{p.notes}</td>
+              <td>
+                <label className="cancelled-toggle">
+                  <input
+                    type="checkbox"
+                    checked={!!p.cancelled}
+                    onChange={(e) => updatePurchase(p.id, { cancelled: e.target.checked })}
+                  />
+                  Cancelled
+                </label>
+              </td>
             </tr>
           ))}
         </tbody>

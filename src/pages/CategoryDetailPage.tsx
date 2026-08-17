@@ -17,7 +17,7 @@ import { PageHeader } from '../components/layout/PageHeader';
 export function CategoryDetailPage() {
   const { categoryId } = useParams<{ categoryId: string }>();
   const { categories, loading: categoriesLoading } = useBudgetCategories();
-  const { purchases, loading: purchasesLoading } = usePurchases();
+  const { purchases, loading: purchasesLoading, updatePurchase } = usePurchases();
   const { subscriptions, loading: subscriptionsLoading } = useSubscriptions();
   const { profile, loading: profileLoading } = useUserProfile();
 
@@ -85,15 +85,26 @@ export function CategoryDetailPage() {
             <th>Amount</th>
             <th>Location</th>
             <th>Notes</th>
+            <th></th>
           </tr>
         </thead>
         <tbody>
           {categoryPurchases.map((p) => (
-            <tr key={p.id}>
+            <tr key={p.id} className={p.cancelled ? 'purchase-cancelled' : undefined}>
               <td>{p.date}</td>
               <td>{formatMoney(p.amount)}</td>
               <td>{p.location}</td>
               <td>{p.notes}</td>
+              <td>
+                <label className="cancelled-toggle">
+                  <input
+                    type="checkbox"
+                    checked={!!p.cancelled}
+                    onChange={(e) => updatePurchase(p.id, { cancelled: e.target.checked })}
+                  />
+                  Cancelled
+                </label>
+              </td>
             </tr>
           ))}
         </tbody>

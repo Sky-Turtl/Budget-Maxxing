@@ -13,7 +13,7 @@ export function computeMonthSpend(
   monthEnd: Date
 ): number {
   const purchaseTotal = purchases
-    .filter((p) => p.categoryId === categoryId)
+    .filter((p) => p.categoryId === categoryId && !p.cancelled)
     .filter((p) => {
       const d = new Date(p.date);
       return d >= monthStart && d < monthEnd;

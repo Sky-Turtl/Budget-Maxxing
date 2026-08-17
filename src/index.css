@@ -546,6 +546,26 @@ tbody tr:hover {
   background: var(--rule);
 }
 
+.purchase-cancelled td {
+  color: var(--ink-faint);
+  text-decoration: line-through;
+  text-decoration-color: var(--ink-faint);
+  text-decoration-thickness: 1px;
+}
+
+.cancelled-toggle {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.72rem;
+  font-family: var(--font-body);
+  color: var(--ink-soft);
+  text-decoration: none;
+  white-space: nowrap;
+  margin-bottom: 0;
+}
+
 /* ---------- misc lists ---------- */
 
 .category-list,
