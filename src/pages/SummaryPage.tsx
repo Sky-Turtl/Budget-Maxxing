@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { usePaycheckConfig, usePostTaxAllocations } from '../hooks/usePaycheckConfig';
 import { useUserProfile } from '../contexts/UserProfileContext';
 import { useBudgetCategories } from '../hooks/useBudgetCategories';
@@ -16,6 +17,8 @@ import { Money } from '../components/Money';
 import { PageHeader } from '../components/layout/PageHeader';
 
 export function SummaryPage() {
+  const [includeInvestments, setIncludeInvestments] = useState(false);
+  const [excludedCategoryIds, setExcludedCategoryIds] = useState<Set<string>>(new Set());
   const { config, loading: configLoading } = usePaycheckConfig();
   const { allocations, loading: allocationsLoading } = usePostTaxAllocations();
   const { profile, loading: profileLoading } = useUserProfile();
@@ -84,11 +87,25 @@ export function SummaryPage() {
     return {
       id: c.id,
       name: c.name,
+      thisMonthSpend,
       monthlyRemaining: computeThisMonthRemaining(c.monthlyBudget, thisMonthSpend),
       fiscalYtdRemaining: computeFiscalYtdRemaining(c.monthlyBudget, elapsedMonths, ytdSpend),
       yearlyRemaining: computeFullYearRemaining(c.monthlyBudget, ytdSpend),
     };
   });
+  const totalSpentThisMonth = categoryRows.reduce((sum, row) => sum + row.thisMonthSpend, 0);
+  const selectedTotalSpentThisMonth = categoryRows
+    .filter((row) => !excludedCategoryIds.has(row.id))
+    .reduce((sum, row) => sum + row.thisMonthSpend, 0);
+
+  function toggleCategoryIncluded(categoryId: string) {
+    setExcludedCategoryIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(categoryId)) next.delete(categoryId);
+      else next.add(categoryId);
+      return next;
+    });
+  }
 
   return (
     <div className="summary-page">
@@ -135,20 +152,34 @@ export function SummaryPage() {
           <Money className="stat-figure" value={-annualAllocatedSpending} />
         </div>
         <div className="stat-block stat-block-wide">
-          <span className="stat-label">Projected monthly take-home after allocated spending</span>
-          <Money className="stat-figure stat-figure-lg" value={projectedMonthlyTakeHome} />
+          <div className="stat-label-row">
+            <span className="stat-label">
+              Projected monthly take-home after allocated spending
+              {includeInvestments && ' (incl. investments)'}
+            </span>
+            <label className="investments-toggle">
+              <input
+                type="checkbox"
+                checked={includeInvestments}
+                onChange={(e) => setIncludeInvestments(e.target.checked)}
+              />
+              Include investments
+            </label>
+          </div>
+          <Money
+            className="stat-figure stat-figure-lg"
+            value={includeInvestments ? projectedMonthlyTakeHomeWithInvestments : projectedMonthlyTakeHome}
+          />
         </div>
         <div className="stat-block stat-block-wide">
-          <span className="stat-label">Projected annual take-home after allocated spending</span>
-          <Money className="stat-figure stat-figure-lg" value={projectedAnnualTakeHome} />
-        </div>
-        <div className="stat-block stat-block-wide">
-          <span className="stat-label">Projected monthly take-home after allocated spending (incl. investments)</span>
-          <Money className="stat-figure stat-figure-lg" value={projectedMonthlyTakeHomeWithInvestments} />
-        </div>
-        <div className="stat-block stat-block-wide">
-          <span className="stat-label">Projected annual take-home after allocated spending (incl. investments)</span>
-          <Money className="stat-figure stat-figure-lg" value={projectedAnnualTakeHomeWithInvestments} />
+          <span className="stat-label">
+            Projected annual take-home after allocated spending
+            {includeInvestments && ' (incl. investments)'}
+          </span>
+          <Money
+            className="stat-figure stat-figure-lg"
+            value={includeInvestments ? projectedAnnualTakeHomeWithInvestments : projectedAnnualTakeHome}
+          />
         </div>
       </section>
 
@@ -177,6 +208,53 @@ export function SummaryPage() {
               </td>
             </tr>
           ))}
+        </tbody>
+      </table>
+
+      <h2>Amount spent this month so far</h2>
+      <p className="page-description">Uncheck a category to leave it out of the selected total below — e.g. rent and utilities.</p>
+      <table>
+        <thead>
+          <tr>
+            <th></th>
+            <th>Category</th>
+            <th>Spent this month</th>
+          </tr>
+        </thead>
+        <tbody>
+          {categoryRows.map((row) => (
+            <tr key={row.id} className={excludedCategoryIds.has(row.id) ? 'purchase-cancelled' : undefined}>
+              <td>
+                <input
+                  type="checkbox"
+                  checked={!excludedCategoryIds.has(row.id)}
+                  onChange={() => toggleCategoryIncluded(row.id)}
+                />
+              </td>
+              <td className="nowrap">{row.name}</td>
+              <td>
+                <Money value={-row.thisMonthSpend} />
+              </td>
+            </tr>
+          ))}
+          <tr>
+            <td></td>
+            <td className="nowrap">
+              <strong>Total</strong>
+            </td>
+            <td>
+              <Money value={-totalSpentThisMonth} />
+            </td>
+          </tr>
+          <tr>
+            <td></td>
+            <td className="nowrap">
+              <strong>Selected total</strong>
+            </td>
+            <td>
+              <Money value={-selectedTotalSpentThisMonth} />
+            </td>
+          </tr>
         </tbody>
       </table>
     </div>

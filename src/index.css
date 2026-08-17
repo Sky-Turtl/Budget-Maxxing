@@ -528,6 +528,29 @@ td select {
   letter-spacing: 0.04em;
 }
 
+.stat-label-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem 1rem;
+}
+
+.investments-toggle {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.72rem;
+  font-family: var(--font-body);
+  font-weight: 400;
+  text-transform: none;
+  letter-spacing: normal;
+  color: var(--ink-soft);
+  margin-bottom: 0;
+  cursor: pointer;
+}
+
 .stat-figure {
   font-size: 1.5rem;
 }
