@@ -4,6 +4,7 @@ import { useUserProfile } from '../contexts/UserProfileContext';
 import { computePaycheck } from '../domain/paycheck/computePaycheck';
 import { Money } from '../components/Money';
 import { PageHeader } from '../components/layout/PageHeader';
+import { LineItemEditor } from '../components/forms/LineItemEditor';
 import type { PostTaxAllocations } from '../types/models';
 
 const DEFAULT: PostTaxAllocations = {
@@ -12,6 +13,7 @@ const DEFAULT: PostTaxAllocations = {
   rothIRA: 0,
   gifts: 0,
   debtPayments: 0,
+  extraAllocations: [],
   updatedAt: 0,
 };
 
@@ -22,7 +24,7 @@ export function PostTaxAllocationsPage() {
   const [form, setForm] = useState<PostTaxAllocations>(DEFAULT);
 
   useEffect(() => {
-    if (allocations) setForm(allocations);
+    if (allocations) setForm({ ...DEFAULT, ...allocations });
   }, [allocations]);
 
   if (loading) return <div className="page-loading">Loading…</div>;
@@ -30,12 +32,20 @@ export function PostTaxAllocationsPage() {
   const netAnnual = config
     ? computePaycheck({
         ...config,
+        otherIncome:
+          config.otherIncome + (config.extraIncome ?? []).reduce((sum, item) => sum + item.amount, 0),
         stateCode: profile?.state ?? '',
       }).netAnnual
     : 0;
 
+  const extraAllocationsTotal = form.extraAllocations.reduce((sum, item) => sum + item.amount, 0);
   const totalAllocations =
-    form.otherPersonalContributions + form.setAsideSavings + form.rothIRA + form.gifts + form.debtPayments;
+    form.otherPersonalContributions +
+    form.setAsideSavings +
+    form.rothIRA +
+    form.gifts +
+    form.debtPayments +
+    extraAllocationsTotal;
   const spendableAnnual = netAnnual - totalAllocations;
   const spendableMonthly = spendableAnnual / 12;
 
@@ -76,11 +86,18 @@ export function PostTaxAllocationsPage() {
               type="number"
               min={0}
               step={0.01}
-              value={form[key]}
+              placeholder="0"
+              value={form[key] || ''}
               onChange={(e) => update(key, Number(e.target.value))}
             />
           </label>
         ))}
+        <LineItemEditor
+          items={form.extraAllocations}
+          onChange={(items) => update('extraAllocations', items)}
+          unit="$/yr"
+          addLabel="+ Add allocation"
+        />
       </section>
 
       <section className="results">

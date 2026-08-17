@@ -1,5 +1,11 @@
 import type { Purchase, Subscription } from '../../types/models';
 
+/** Parses a "YYYY-MM-DD" date-only string as local midnight, not UTC midnight. */
+function parseLocalDate(isoDate: string): Date {
+  const [year, month, day] = isoDate.split('-').map(Number);
+  return new Date(year, month - 1, day);
+}
+
 /**
  * Sums purchases + lazily-resolved active subscriptions billed within [monthStart, monthEnd)
  * for a given category. Subscriptions are never written as synthetic purchase docs — their
@@ -13,9 +19,9 @@ export function computeMonthSpend(
   monthEnd: Date
 ): number {
   const purchaseTotal = purchases
-    .filter((p) => p.categoryId === categoryId)
+    .filter((p) => p.categoryId === categoryId && !p.cancelled)
     .filter((p) => {
-      const d = new Date(p.date);
+      const d = parseLocalDate(p.date);
       return d >= monthStart && d < monthEnd;
     })
     .reduce((sum, p) => sum + p.amount, 0);
@@ -34,6 +40,24 @@ export function computeMonthSpend(
 
 function daysInMonth(monthStart: Date): number {
   return new Date(monthStart.getFullYear(), monthStart.getMonth() + 1, 0).getDate();
+}
+
+/** Sums each elapsed fiscal month's spend (purchases + subscriptions) for a category, from fyStart through now. */
+export function computeFiscalYtdSpend(
+  purchases: Purchase[],
+  subscriptions: Subscription[],
+  categoryId: string,
+  fyStart: Date,
+  fyEnd: Date,
+  now: Date
+): number {
+  let ytdSpend = 0;
+  for (let cursor = new Date(fyStart); cursor < fyEnd && cursor <= now; cursor.setMonth(cursor.getMonth() + 1)) {
+    const mStart = new Date(cursor.getFullYear(), cursor.getMonth(), 1);
+    const mEnd = new Date(cursor.getFullYear(), cursor.getMonth() + 1, 1);
+    ytdSpend += computeMonthSpend(purchases, subscriptions, categoryId, mStart, mEnd);
+  }
+  return ytdSpend;
 }
 
 /** Remaining budget for the current month only. */

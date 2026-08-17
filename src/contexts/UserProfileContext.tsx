@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
-import { onSnapshot } from 'firebase/firestore';
+import { onSnapshot, updateDoc } from 'firebase/firestore';
 import { userProfileRef } from '../firebase/firestore';
 import type { UserProfile } from '../types/models';
 import { useAuth } from './AuthContext';
@@ -7,9 +7,14 @@ import { useAuth } from './AuthContext';
 interface UserProfileContextValue {
   profile: UserProfile | null;
   loading: boolean;
+  updateProfile: (updates: Partial<UserProfile>) => Promise<void>;
 }
 
-const UserProfileContext = createContext<UserProfileContextValue>({ profile: null, loading: true });
+const UserProfileContext = createContext<UserProfileContextValue>({
+  profile: null,
+  loading: true,
+  updateProfile: async () => {},
+});
 
 export function UserProfileProvider({ children }: { children: ReactNode }) {
   const { user } = useAuth();
@@ -29,8 +34,13 @@ export function UserProfileProvider({ children }: { children: ReactNode }) {
     });
   }, [user]);
 
+  async function updateProfile(updates: Partial<UserProfile>) {
+    if (!user) return;
+    await updateDoc(userProfileRef(user.uid), { ...updates, updatedAt: Date.now() });
+  }
+
   return (
-    <UserProfileContext.Provider value={{ profile, loading }}>
+    <UserProfileContext.Provider value={{ profile, loading, updateProfile }}>
       {children}
     </UserProfileContext.Provider>
   );

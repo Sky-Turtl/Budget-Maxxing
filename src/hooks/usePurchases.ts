@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
-import { onSnapshot, addDoc } from 'firebase/firestore';
-import { purchasesCollection } from '../firebase/firestore';
+import { onSnapshot, addDoc, updateDoc, deleteDoc } from 'firebase/firestore';
+import { purchasesCollection, purchaseRef } from '../firebase/firestore';
 import type { Purchase } from '../types/models';
 import { useAuth } from '../contexts/AuthContext';
 
@@ -34,5 +34,15 @@ export function usePurchases() {
     });
   }
 
-  return { purchases, loading, addPurchase };
+  async function updatePurchase(purchaseId: string, updates: Partial<Purchase>) {
+    if (!user) return;
+    await updateDoc(purchaseRef(user.uid, purchaseId), updates);
+  }
+
+  async function deletePurchase(purchaseId: string) {
+    if (!user) return;
+    await deleteDoc(purchaseRef(user.uid, purchaseId));
+  }
+
+  return { purchases, loading, addPurchase, updatePurchase, deletePurchase };
 }

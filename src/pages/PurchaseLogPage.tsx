@@ -1,26 +1,33 @@
 import { useState, type FormEvent } from 'react';
 import { usePurchases } from '../hooks/usePurchases';
 import { useBudgetCategories } from '../hooks/useBudgetCategories';
-import { formatMoney } from '../utils/money';
 import { PageHeader } from '../components/layout/PageHeader';
+import { PurchaseRow } from '../components/PurchaseRow';
 
 function todayISO() {
   return new Date().toISOString().slice(0, 10);
 }
 
 export function PurchaseLogPage() {
-  const { purchases, loading, addPurchase } = usePurchases();
+  const { purchases, loading, addPurchase, updatePurchase, deletePurchase } = usePurchases();
   const { categories } = useBudgetCategories();
   const [date, setDate] = useState(todayISO());
   const [amount, setAmount] = useState(0);
   const [categoryId, setCategoryId] = useState('');
   const [location, setLocation] = useState('');
   const [notes, setNotes] = useState('');
+  const [sortDir, setSortDir] = useState<'desc' | 'asc'>('desc');
 
   if (loading) return <div className="page-loading">Loading…</div>;
 
   const activeCategories = categories.filter((c) => !c.archived);
-  const recent = [...purchases].sort((a, b) => (a.date < b.date ? 1 : -1)).slice(0, 20);
+  const sign = sortDir === 'desc' ? -1 : 1;
+  const recent = [...purchases]
+    .sort((a, b) => {
+      if (a.date !== b.date) return a.date < b.date ? -sign : sign;
+      return a.createdAt < b.createdAt ? -sign : sign;
+    })
+    .slice(0, 20);
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
@@ -39,42 +46,46 @@ export function PurchaseLogPage() {
       />
 
       <form onSubmit={handleSubmit}>
-        <label>
-          Date
-          <input type="date" value={date} onChange={(e) => setDate(e.target.value)} required />
-        </label>
-        <label>
-          Amount
-          <input
-            type="number"
-            min={0}
-            step={0.01}
-            value={amount || ''}
-            onChange={(e) => setAmount(Number(e.target.value))}
-            required
-          />
-        </label>
-        <label>
-          Category
-          <select value={categoryId} onChange={(e) => setCategoryId(e.target.value)} required>
-            <option value="" disabled>
-              Select
-            </option>
-            {activeCategories.map((c) => (
-              <option key={c.id} value={c.id}>
-                {c.name}
+        <div className="form-row">
+          <label>
+            Date
+            <input type="date" value={date} onChange={(e) => setDate(e.target.value)} required />
+          </label>
+          <label>
+            Amount
+            <input
+              type="number"
+              min={0}
+              step={0.01}
+              value={amount || ''}
+              onChange={(e) => setAmount(Number(e.target.value))}
+              required
+            />
+          </label>
+          <label>
+            Category
+            <select value={categoryId} onChange={(e) => setCategoryId(e.target.value)} required>
+              <option value="" disabled>
+                Select
               </option>
-            ))}
-          </select>
-        </label>
-        <label>
-          Location
-          <input value={location} onChange={(e) => setLocation(e.target.value)} />
-        </label>
-        <label>
-          Notes (optional)
-          <input value={notes} onChange={(e) => setNotes(e.target.value)} />
-        </label>
+              {activeCategories.map((c) => (
+                <option key={c.id} value={c.id}>
+                  {c.name}
+                </option>
+              ))}
+            </select>
+          </label>
+        </div>
+        <div className="form-row">
+          <label>
+            Location
+            <input value={location} onChange={(e) => setLocation(e.target.value)} />
+          </label>
+          <label>
+            Notes (optional)
+            <input value={notes} onChange={(e) => setNotes(e.target.value)} />
+          </label>
+        </div>
         <button type="submit">Log purchase</button>
       </form>
 
@@ -82,22 +93,31 @@ export function PurchaseLogPage() {
       <table>
         <thead>
           <tr>
-            <th>Date</th>
+            <th>
+              <button
+                type="button"
+                className="th-sort"
+                onClick={() => setSortDir((d) => (d === 'desc' ? 'asc' : 'desc'))}
+              >
+                Date {sortDir === 'desc' ? '↓' : '↑'}
+              </button>
+            </th>
             <th>Amount</th>
             <th>Category</th>
             <th>Location</th>
             <th>Notes</th>
+            <th></th>
           </tr>
         </thead>
         <tbody>
           {recent.map((p) => (
-            <tr key={p.id}>
-              <td>{p.date}</td>
-              <td>{formatMoney(p.amount)}</td>
-              <td>{categories.find((c) => c.id === p.categoryId)?.name ?? 'Unknown'}</td>
-              <td>{p.location}</td>
-              <td>{p.notes}</td>
-            </tr>
+            <PurchaseRow
+              key={p.id}
+              purchase={p}
+              categories={categories}
+              onUpdate={updatePurchase}
+              onDelete={deletePurchase}
+            />
           ))}
         </tbody>
       </table>

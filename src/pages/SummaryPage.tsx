@@ -1,12 +1,17 @@
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 import { usePaycheckConfig, usePostTaxAllocations } from '../hooks/usePaycheckConfig';
 import { useUserProfile } from '../contexts/UserProfileContext';
 import { useBudgetCategories } from '../hooks/useBudgetCategories';
 import { useSubscriptions } from '../hooks/useSubscriptions';
 import { usePurchases } from '../hooks/usePurchases';
 import { computePaycheck } from '../domain/paycheck/computePaycheck';
-import { computeMonthSpend } from '../domain/spending/categoryMetrics';
-import { formatMoney } from '../utils/money';
+import {
+  computeMonthSpend,
+  computeFiscalYtdSpend,
+  computeThisMonthRemaining,
+  computeFiscalYtdRemaining,
+  computeFullYearRemaining,
+} from '../domain/spending/categoryMetrics';
+import { getElapsedFiscalMonths, getFiscalYearBounds } from '../domain/spending/fiscalYear';
 import { Money } from '../components/Money';
 import { PageHeader } from '../components/layout/PageHeader';
 
@@ -43,17 +48,47 @@ export function SummaryPage() {
   const monthlyTakeHome = annualTakeHome / 12;
   const annualInvested = paycheck.total401k + (allocations?.rothIRA ?? 0);
   const monthlyInvested = annualInvested / 12;
-  const totalIncludingInvestments = annualTakeHome + annualInvested;
+
+  const monthlySubscriptionsTotal = subscriptions
+    .filter((s) => s.active)
+    .reduce((sum, s) => sum + s.amount, 0);
+  const annualSubscriptionsTotal = monthlySubscriptionsTotal * 12;
+
+  const totalIncludingInvestments = annualTakeHome + annualInvested - annualSubscriptionsTotal;
+
+  const activeCategories = categories.filter((c) => !c.archived);
+  // Subscriptions tied to a category draw down that category's budget already; only
+  // uncategorized subscriptions need to be subtracted separately here.
+  const monthlyUncategorizedSubscriptions = subscriptions
+    .filter((s) => s.active && !s.categoryId)
+    .reduce((sum, s) => sum + s.amount, 0);
+  const monthlyCategoryBudgetTotal = activeCategories.reduce((sum, c) => sum + c.monthlyBudget, 0);
+  const monthlyAllocatedSpending = monthlyCategoryBudgetTotal + monthlyUncategorizedSubscriptions;
+  const annualAllocatedSpending = monthlyAllocatedSpending * 12;
+
+  const projectedMonthlyTakeHome = monthlyTakeHome - monthlyAllocatedSpending;
+  const projectedAnnualTakeHome = annualTakeHome - annualAllocatedSpending;
+  const projectedMonthlyTakeHomeWithInvestments = projectedMonthlyTakeHome + monthlyInvested;
+  const projectedAnnualTakeHomeWithInvestments = projectedAnnualTakeHome + annualInvested;
 
   const now = new Date();
   const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
   const monthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 1);
-  const activeCategories = categories.filter((c) => !c.archived);
-  const chartData = activeCategories.map((c) => ({
-    name: c.name,
-    budget: c.monthlyBudget,
-    spent: computeMonthSpend(purchases, subscriptions, c.id, monthStart, monthEnd),
-  }));
+  const fiscalStartMonth = profile.fiscalYearStartMonth;
+  const { start: fyStart, end: fyEnd } = getFiscalYearBounds(now, fiscalStartMonth);
+  const elapsedMonths = getElapsedFiscalMonths(now, fiscalStartMonth);
+
+  const categoryRows = activeCategories.map((c) => {
+    const thisMonthSpend = computeMonthSpend(purchases, subscriptions, c.id, monthStart, monthEnd);
+    const ytdSpend = computeFiscalYtdSpend(purchases, subscriptions, c.id, fyStart, fyEnd, now);
+    return {
+      id: c.id,
+      name: c.name,
+      monthlyRemaining: computeThisMonthRemaining(c.monthlyBudget, thisMonthSpend),
+      fiscalYtdRemaining: computeFiscalYtdRemaining(c.monthlyBudget, elapsedMonths, ytdSpend),
+      yearlyRemaining: computeFullYearRemaining(c.monthlyBudget, ytdSpend),
+    };
+  });
 
   return (
     <div className="summary-page">
@@ -79,24 +114,71 @@ export function SummaryPage() {
           <span className="stat-label">Annual invested</span>
           <Money className="stat-figure" value={annualInvested} />
         </div>
+        <div className="stat-block">
+          <span className="stat-label">Monthly subscriptions</span>
+          <Money className="stat-figure" value={-monthlySubscriptionsTotal} />
+        </div>
+        <div className="stat-block">
+          <span className="stat-label">Annual subscriptions</span>
+          <Money className="stat-figure" value={-annualSubscriptionsTotal} />
+        </div>
         <div className="stat-block stat-block-wide">
-          <span className="stat-label">Total including investments</span>
+          <span className="stat-label">Total including investments (after subscriptions)</span>
           <Money className="stat-figure stat-figure-lg" value={totalIncludingInvestments} />
+        </div>
+        <div className="stat-block">
+          <span className="stat-label">Monthly allocated spending</span>
+          <Money className="stat-figure" value={-monthlyAllocatedSpending} />
+        </div>
+        <div className="stat-block">
+          <span className="stat-label">Annual allocated spending</span>
+          <Money className="stat-figure" value={-annualAllocatedSpending} />
+        </div>
+        <div className="stat-block stat-block-wide">
+          <span className="stat-label">Projected monthly take-home after allocated spending</span>
+          <Money className="stat-figure stat-figure-lg" value={projectedMonthlyTakeHome} />
+        </div>
+        <div className="stat-block stat-block-wide">
+          <span className="stat-label">Projected annual take-home after allocated spending</span>
+          <Money className="stat-figure stat-figure-lg" value={projectedAnnualTakeHome} />
+        </div>
+        <div className="stat-block stat-block-wide">
+          <span className="stat-label">Projected monthly take-home after allocated spending (incl. investments)</span>
+          <Money className="stat-figure stat-figure-lg" value={projectedMonthlyTakeHomeWithInvestments} />
+        </div>
+        <div className="stat-block stat-block-wide">
+          <span className="stat-label">Projected annual take-home after allocated spending (incl. investments)</span>
+          <Money className="stat-figure stat-figure-lg" value={projectedAnnualTakeHomeWithInvestments} />
         </div>
       </section>
 
-      <h2>This month: budget vs. spent by category</h2>
-      {chartData.length > 0 && (
-        <ResponsiveContainer width="100%" height={Math.max(200, chartData.length * 50)}>
-          <BarChart data={chartData} layout="vertical">
-            <XAxis type="number" />
-            <YAxis type="category" dataKey="name" width={120} />
-            <Tooltip formatter={(value) => formatMoney(Number(value))} />
-            <Bar dataKey="budget" fill="#B8912F" radius={[0, 3, 3, 0]} />
-            <Bar dataKey="spent" fill="#16302B" radius={[0, 3, 3, 0]} />
-          </BarChart>
-        </ResponsiveContainer>
-      )}
+      <h2>Remaining budget by category</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Category</th>
+            <th>Monthly remaining</th>
+            <th>Fiscal YTD remaining</th>
+            <th>Yearly remaining</th>
+          </tr>
+        </thead>
+        <tbody>
+          {categoryRows.map((row) => (
+            <tr key={row.id}>
+              <td className="nowrap">{row.name}</td>
+              <td>
+                <Money value={row.monthlyRemaining} />
+              </td>
+              <td>
+                <Money value={row.fiscalYtdRemaining} />
+              </td>
+              <td>
+                <Money value={row.yearlyRemaining} />
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
     </div>
   );
 }

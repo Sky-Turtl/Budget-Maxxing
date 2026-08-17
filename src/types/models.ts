@@ -18,11 +18,18 @@ export interface MatchTier {
   matchRate: number;
 }
 
+export interface LineItem {
+  id: string;
+  label: string;
+  amount: number;
+}
+
 export interface PaycheckConfig {
   pretaxBasePay: number;
   signOnBonus: number;
   relocation: number;
   otherIncome: number;
+  extraIncome: LineItem[];
   employee401kTraditional: ContributionInput;
   employee401kRoth: ContributionInput;
   employerMatchTiers: MatchTier[];
@@ -36,6 +43,7 @@ export interface PostTaxAllocations {
   rothIRA: number;
   gifts: number;
   debtPayments: number;
+  extraAllocations: LineItem[];
   updatedAt: number;
 }
 
@@ -54,7 +62,7 @@ export interface Subscription {
   name: string;
   amount: number;
   billingDate: number; // 1-31
-  categoryId: string;
+  categoryId?: string;
   active: boolean;
   createdAt: number;
   updatedAt: number;
@@ -67,5 +75,6 @@ export interface Purchase {
   categoryId: string;
   location: string;
   notes?: string;
+  cancelled?: boolean;
   createdAt: number;
 }
