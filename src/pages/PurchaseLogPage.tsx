@@ -39,42 +39,46 @@ export function PurchaseLogPage() {
       />
 
       <form onSubmit={handleSubmit}>
-        <label>
-          Date
-          <input type="date" value={date} onChange={(e) => setDate(e.target.value)} required />
-        </label>
-        <label>
-          Amount
-          <input
-            type="number"
-            min={0}
-            step={0.01}
-            value={amount || ''}
-            onChange={(e) => setAmount(Number(e.target.value))}
-            required
-          />
-        </label>
-        <label>
-          Category
-          <select value={categoryId} onChange={(e) => setCategoryId(e.target.value)} required>
-            <option value="" disabled>
-              Select
-            </option>
-            {activeCategories.map((c) => (
-              <option key={c.id} value={c.id}>
-                {c.name}
+        <div className="form-row">
+          <label>
+            Date
+            <input type="date" value={date} onChange={(e) => setDate(e.target.value)} required />
+          </label>
+          <label>
+            Amount
+            <input
+              type="number"
+              min={0}
+              step={0.01}
+              value={amount || ''}
+              onChange={(e) => setAmount(Number(e.target.value))}
+              required
+            />
+          </label>
+          <label>
+            Category
+            <select value={categoryId} onChange={(e) => setCategoryId(e.target.value)} required>
+              <option value="" disabled>
+                Select
               </option>
-            ))}
-          </select>
-        </label>
-        <label>
-          Location
-          <input value={location} onChange={(e) => setLocation(e.target.value)} />
-        </label>
-        <label>
-          Notes (optional)
-          <input value={notes} onChange={(e) => setNotes(e.target.value)} />
-        </label>
+              {activeCategories.map((c) => (
+                <option key={c.id} value={c.id}>
+                  {c.name}
+                </option>
+              ))}
+            </select>
+          </label>
+        </div>
+        <div className="form-row">
+          <label>
+            Location
+            <input value={location} onChange={(e) => setLocation(e.target.value)} />
+          </label>
+          <label>
+            Notes (optional)
+            <input value={notes} onChange={(e) => setNotes(e.target.value)} />
+          </label>
+        </div>
         <button type="submit">Log purchase</button>
       </form>
 
