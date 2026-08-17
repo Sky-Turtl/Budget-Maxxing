@@ -84,7 +84,7 @@ export function PurchaseRow({ purchase, categories, onUpdate, onDelete }: Props)
         <td>{categories.find((c) => c.id === purchase.categoryId)?.name ?? 'Unknown'}</td>
       )}
       <td>{purchase.location}</td>
-      <td>{purchase.notes}</td>
+      <td className="notes-cell">{purchase.notes}</td>
       <td className="row-actions">
         <button type="button" className="btn-link" onClick={startEdit}>
           Edit

@@ -63,7 +63,7 @@ body {
   background: var(--paper);
   color: var(--ink);
   font-family: var(--font-body);
-  font-size: 15px;
+  font-size: 16.5px;
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
 }
@@ -602,6 +602,19 @@ td {
 
 tbody tr:hover {
   background: var(--rule);
+}
+
+.notes-cell {
+  color: transparent;
+  transition: color 0.1s ease;
+}
+
+.notes-cell:hover {
+  color: var(--ink);
+}
+
+.purchase-cancelled .notes-cell:hover {
+  color: var(--ink-faint);
 }
 
 .purchase-cancelled td {
