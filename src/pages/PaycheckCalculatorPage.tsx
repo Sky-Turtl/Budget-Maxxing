@@ -10,6 +10,11 @@ import { Money } from '../components/Money';
 import { PageHeader } from '../components/layout/PageHeader';
 import type { ContributionInput, MatchTier, PaycheckConfig } from '../types/models';
 
+const MONTHS = [
+  'January', 'February', 'March', 'April', 'May', 'June',
+  'July', 'August', 'September', 'October', 'November', 'December',
+];
+
 const DEFAULT_CONFIG: PaycheckConfig = {
   pretaxBasePay: 0,
   signOnBonus: 0,
@@ -58,7 +63,7 @@ function ContributionInputEditor({
 
 export function PaycheckCalculatorPage() {
   const { config, loading, save } = usePaycheckConfig();
-  const { profile } = useUserProfile();
+  const { profile, updateProfile } = useUserProfile();
   const [form, setForm] = useState<PaycheckConfig>(DEFAULT_CONFIG);
   const [manualStateRate, setManualStateRate] = useState(0);
 
@@ -98,6 +103,25 @@ export function PaycheckCalculatorPage() {
         title="Paycheck Calculator"
         description="Enter your gross pay and 401k setup to see FICA, federal, and state tax withholding, and what actually lands as net income."
       />
+
+      {profile && (
+        <section>
+          <h2>Settings</h2>
+          <label className="field-row">
+            <span className="field-label">Fiscal year start month</span>
+            <select
+              value={profile.fiscalYearStartMonth}
+              onChange={(e) => updateProfile({ fiscalYearStartMonth: Number(e.target.value) })}
+            >
+              {MONTHS.map((m, i) => (
+                <option key={m} value={i + 1}>
+                  {m}
+                </option>
+              ))}
+            </select>
+          </label>
+        </section>
+      )}
 
       <section>
         <h2>Income</h2>
