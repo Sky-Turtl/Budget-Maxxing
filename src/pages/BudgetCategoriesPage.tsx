@@ -29,15 +29,20 @@ export function BudgetCategoriesPage() {
       />
 
       <form onSubmit={handleSubmit}>
-        <input placeholder="Category name" value={name} onChange={(e) => setName(e.target.value)} />
-        <input
-          type="number"
-          min={0}
-          step={0.01}
-          placeholder="Monthly budget"
-          value={monthlyBudget || ''}
-          onChange={(e) => setMonthlyBudget(Number(e.target.value))}
-        />
+        <label>
+          Category name
+          <input value={name} onChange={(e) => setName(e.target.value)} />
+        </label>
+        <label>
+          Monthly budget
+          <input
+            type="number"
+            min={0}
+            step={0.01}
+            value={monthlyBudget || ''}
+            onChange={(e) => setMonthlyBudget(Number(e.target.value))}
+          />
+        </label>
         <button type="submit">Add category</button>
       </form>
 
