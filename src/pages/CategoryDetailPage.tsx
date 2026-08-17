@@ -10,9 +10,9 @@ import {
   computeFullYearRemaining,
 } from '../domain/spending/categoryMetrics';
 import { getElapsedFiscalMonths, getFiscalYearBounds } from '../domain/spending/fiscalYear';
-import { formatMoney } from '../utils/money';
 import { Money } from '../components/Money';
 import { PageHeader } from '../components/layout/PageHeader';
+import { PurchaseRow } from '../components/PurchaseRow';
 
 export function CategoryDetailPage() {
   const { categoryId } = useParams<{ categoryId: string }>();
@@ -90,22 +90,7 @@ export function CategoryDetailPage() {
         </thead>
         <tbody>
           {categoryPurchases.map((p) => (
-            <tr key={p.id} className={p.cancelled ? 'purchase-cancelled' : undefined}>
-              <td>{p.date}</td>
-              <td>{formatMoney(p.amount)}</td>
-              <td>{p.location}</td>
-              <td>{p.notes}</td>
-              <td>
-                <label className="cancelled-toggle">
-                  <input
-                    type="checkbox"
-                    checked={!!p.cancelled}
-                    onChange={(e) => updatePurchase(p.id, { cancelled: e.target.checked })}
-                  />
-                  Cancelled
-                </label>
-              </td>
-            </tr>
+            <PurchaseRow key={p.id} purchase={p} onUpdate={updatePurchase} />
           ))}
         </tbody>
       </table>

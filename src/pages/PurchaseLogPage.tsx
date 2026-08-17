@@ -1,8 +1,8 @@
 import { useState, type FormEvent } from 'react';
 import { usePurchases } from '../hooks/usePurchases';
 import { useBudgetCategories } from '../hooks/useBudgetCategories';
-import { formatMoney } from '../utils/money';
 import { PageHeader } from '../components/layout/PageHeader';
+import { PurchaseRow } from '../components/PurchaseRow';
 
 function todayISO() {
   return new Date().toISOString().slice(0, 10);
@@ -92,23 +92,7 @@ export function PurchaseLogPage() {
         </thead>
         <tbody>
           {recent.map((p) => (
-            <tr key={p.id} className={p.cancelled ? 'purchase-cancelled' : undefined}>
-              <td>{p.date}</td>
-              <td>{formatMoney(p.amount)}</td>
-              <td>{categories.find((c) => c.id === p.categoryId)?.name ?? 'Unknown'}</td>
-              <td>{p.location}</td>
-              <td>{p.notes}</td>
-              <td>
-                <label className="cancelled-toggle">
-                  <input
-                    type="checkbox"
-                    checked={!!p.cancelled}
-                    onChange={(e) => updatePurchase(p.id, { cancelled: e.target.checked })}
-                  />
-                  Cancelled
-                </label>
-              </td>
-            </tr>
+            <PurchaseRow key={p.id} purchase={p} categories={categories} onUpdate={updatePurchase} />
           ))}
         </tbody>
       </table>
