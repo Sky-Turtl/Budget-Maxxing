@@ -57,7 +57,7 @@ export function PostTaxAllocationsPage() {
     await save({ ...form, updatedAt: Date.now() });
   }
 
-  const fields: { key: keyof Omit<PostTaxAllocations, 'updatedAt'>; label: string }[] = [
+  const fields: { key: keyof Omit<PostTaxAllocations, 'updatedAt' | 'extraAllocations'>; label: string }[] = [
     { key: 'otherPersonalContributions', label: 'Other personal contributions' },
     { key: 'setAsideSavings', label: 'Set aside / savings' },
     { key: 'rothIRA', label: 'Roth IRA' },
