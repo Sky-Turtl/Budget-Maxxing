@@ -76,7 +76,8 @@ export function PostTaxAllocationsPage() {
               type="number"
               min={0}
               step={0.01}
-              value={form[key]}
+              placeholder="0"
+              value={form[key] || ''}
               onChange={(e) => update(key, Number(e.target.value))}
             />
           </label>

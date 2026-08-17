@@ -325,8 +325,8 @@ label.field-row {
   display: flex;
   flex-direction: row;
   align-items: center;
-  justify-content: space-between;
-  gap: 1.5rem;
+  justify-content: flex-start;
+  gap: 1rem;
   padding: 0.7rem 0;
   margin-bottom: 0;
   width: 100%;
@@ -340,6 +340,7 @@ label.field-row {
   font-size: 0.92rem;
   font-weight: 500;
   color: var(--ink);
+  flex: none;
 }
 
 .field-row .field-unit {
@@ -349,9 +350,14 @@ label.field-row {
 }
 
 .field-row input {
-  width: 9rem;
-  text-align: right;
+  field-sizing: content;
+  min-width: 2ch;
+  text-align: left;
   flex: none;
+}
+
+input::placeholder {
+  color: var(--ink-faint);
 }
 
 /* ---------- buttons ---------- */

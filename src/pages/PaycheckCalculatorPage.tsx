@@ -105,7 +105,8 @@ export function PaycheckCalculatorPage() {
             type="number"
             min={0}
             step={0.01}
-            value={form.pretaxBasePay}
+            placeholder="0"
+            value={form.pretaxBasePay || ''}
             onChange={(e) => update('pretaxBasePay', Number(e.target.value))}
           />
         </label>
@@ -118,7 +119,8 @@ export function PaycheckCalculatorPage() {
             type="number"
             min={0}
             step={0.01}
-            value={form.signOnBonus}
+            placeholder="0"
+            value={form.signOnBonus || ''}
             onChange={(e) => update('signOnBonus', Number(e.target.value))}
           />
         </label>
@@ -131,7 +133,8 @@ export function PaycheckCalculatorPage() {
             type="number"
             min={0}
             step={0.01}
-            value={form.relocation}
+            placeholder="0"
+            value={form.relocation || ''}
             onChange={(e) => update('relocation', Number(e.target.value))}
           />
         </label>
@@ -144,7 +147,8 @@ export function PaycheckCalculatorPage() {
             type="number"
             min={0}
             step={0.01}
-            value={form.otherIncome}
+            placeholder="0"
+            value={form.otherIncome || ''}
             onChange={(e) => update('otherIncome', Number(e.target.value))}
           />
         </label>
