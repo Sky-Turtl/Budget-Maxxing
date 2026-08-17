@@ -330,7 +330,6 @@ label.field-row {
   padding: 0.7rem 0;
   margin-bottom: 0;
   width: 100%;
-  border-bottom: 1px solid var(--rule);
 }
 
 .field-row .field-label {
