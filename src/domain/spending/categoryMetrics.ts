@@ -36,6 +36,24 @@ function daysInMonth(monthStart: Date): number {
   return new Date(monthStart.getFullYear(), monthStart.getMonth() + 1, 0).getDate();
 }
 
+/** Sums each elapsed fiscal month's spend (purchases + subscriptions) for a category, from fyStart through now. */
+export function computeFiscalYtdSpend(
+  purchases: Purchase[],
+  subscriptions: Subscription[],
+  categoryId: string,
+  fyStart: Date,
+  fyEnd: Date,
+  now: Date
+): number {
+  let ytdSpend = 0;
+  for (let cursor = new Date(fyStart); cursor < fyEnd && cursor <= now; cursor.setMonth(cursor.getMonth() + 1)) {
+    const mStart = new Date(cursor.getFullYear(), cursor.getMonth(), 1);
+    const mEnd = new Date(cursor.getFullYear(), cursor.getMonth() + 1, 1);
+    ytdSpend += computeMonthSpend(purchases, subscriptions, categoryId, mStart, mEnd);
+  }
+  return ytdSpend;
+}
+
 /** Remaining budget for the current month only. */
 export function computeThisMonthRemaining(monthlyBudget: number, monthSpend: number): number {
   return monthlyBudget - monthSpend;

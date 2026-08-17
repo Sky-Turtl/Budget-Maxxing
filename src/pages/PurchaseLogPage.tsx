@@ -9,7 +9,7 @@ function todayISO() {
 }
 
 export function PurchaseLogPage() {
-  const { purchases, loading, addPurchase, updatePurchase } = usePurchases();
+  const { purchases, loading, addPurchase, updatePurchase, deletePurchase } = usePurchases();
   const { categories } = useBudgetCategories();
   const [date, setDate] = useState(todayISO());
   const [amount, setAmount] = useState(0);
@@ -92,7 +92,13 @@ export function PurchaseLogPage() {
         </thead>
         <tbody>
           {recent.map((p) => (
-            <PurchaseRow key={p.id} purchase={p} categories={categories} onUpdate={updatePurchase} />
+            <PurchaseRow
+              key={p.id}
+              purchase={p}
+              categories={categories}
+              onUpdate={updatePurchase}
+              onDelete={deletePurchase}
+            />
           ))}
         </tbody>
       </table>

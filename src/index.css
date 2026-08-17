@@ -447,6 +447,10 @@ button:disabled {
   opacity: 0.75;
 }
 
+.btn-link-danger {
+  color: var(--rust-strong);
+}
+
 .row-actions {
   display: flex;
   align-items: center;

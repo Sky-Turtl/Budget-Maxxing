@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { onSnapshot, addDoc, updateDoc } from 'firebase/firestore';
+import { onSnapshot, addDoc, updateDoc, deleteDoc } from 'firebase/firestore';
 import { purchasesCollection, purchaseRef } from '../firebase/firestore';
 import type { Purchase } from '../types/models';
 import { useAuth } from '../contexts/AuthContext';
@@ -39,5 +39,10 @@ export function usePurchases() {
     await updateDoc(purchaseRef(user.uid, purchaseId), updates);
   }
 
-  return { purchases, loading, addPurchase, updatePurchase };
+  async function deletePurchase(purchaseId: string) {
+    if (!user) return;
+    await deleteDoc(purchaseRef(user.uid, purchaseId));
+  }
+
+  return { purchases, loading, addPurchase, updatePurchase, deletePurchase };
 }

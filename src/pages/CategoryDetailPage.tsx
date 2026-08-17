@@ -5,6 +5,7 @@ import { useBudgetCategories } from '../hooks/useBudgetCategories';
 import { useUserProfile } from '../contexts/UserProfileContext';
 import {
   computeMonthSpend,
+  computeFiscalYtdSpend,
   computeThisMonthRemaining,
   computeFiscalYtdRemaining,
   computeFullYearRemaining,
@@ -17,7 +18,7 @@ import { PurchaseRow } from '../components/PurchaseRow';
 export function CategoryDetailPage() {
   const { categoryId } = useParams<{ categoryId: string }>();
   const { categories, loading: categoriesLoading } = useBudgetCategories();
-  const { purchases, loading: purchasesLoading, updatePurchase } = usePurchases();
+  const { purchases, loading: purchasesLoading, updatePurchase, deletePurchase } = usePurchases();
   const { subscriptions, loading: subscriptionsLoading } = useSubscriptions();
   const { profile, loading: profileLoading } = useUserProfile();
 
@@ -37,12 +38,7 @@ export function CategoryDetailPage() {
   const monthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 1);
   const thisMonthSpend = computeMonthSpend(purchases, subscriptions, categoryId, monthStart, monthEnd);
 
-  let ytdSpend = 0;
-  for (let cursor = new Date(fyStart); cursor < fyEnd && cursor <= now; cursor.setMonth(cursor.getMonth() + 1)) {
-    const mStart = new Date(cursor.getFullYear(), cursor.getMonth(), 1);
-    const mEnd = new Date(cursor.getFullYear(), cursor.getMonth() + 1, 1);
-    ytdSpend += computeMonthSpend(purchases, subscriptions, categoryId, mStart, mEnd);
-  }
+  const ytdSpend = computeFiscalYtdSpend(purchases, subscriptions, categoryId, fyStart, fyEnd, now);
 
   const thisMonthRemaining = computeThisMonthRemaining(category.monthlyBudget, thisMonthSpend);
   const fiscalYtdRemaining = computeFiscalYtdRemaining(category.monthlyBudget, elapsedMonths, ytdSpend);
@@ -90,7 +86,7 @@ export function CategoryDetailPage() {
         </thead>
         <tbody>
           {categoryPurchases.map((p) => (
-            <PurchaseRow key={p.id} purchase={p} onUpdate={updatePurchase} />
+            <PurchaseRow key={p.id} purchase={p} onUpdate={updatePurchase} onDelete={deletePurchase} />
           ))}
         </tbody>
       </table>

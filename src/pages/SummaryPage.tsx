@@ -1,12 +1,17 @@
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 import { usePaycheckConfig, usePostTaxAllocations } from '../hooks/usePaycheckConfig';
 import { useUserProfile } from '../contexts/UserProfileContext';
 import { useBudgetCategories } from '../hooks/useBudgetCategories';
 import { useSubscriptions } from '../hooks/useSubscriptions';
 import { usePurchases } from '../hooks/usePurchases';
 import { computePaycheck } from '../domain/paycheck/computePaycheck';
-import { computeMonthSpend } from '../domain/spending/categoryMetrics';
-import { formatMoney } from '../utils/money';
+import {
+  computeMonthSpend,
+  computeFiscalYtdSpend,
+  computeThisMonthRemaining,
+  computeFiscalYtdRemaining,
+  computeFullYearRemaining,
+} from '../domain/spending/categoryMetrics';
+import { getElapsedFiscalMonths, getFiscalYearBounds } from '../domain/spending/fiscalYear';
 import { Money } from '../components/Money';
 import { PageHeader } from '../components/layout/PageHeader';
 
@@ -48,12 +53,22 @@ export function SummaryPage() {
   const now = new Date();
   const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
   const monthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+  const fiscalStartMonth = profile.fiscalYearStartMonth;
+  const { start: fyStart, end: fyEnd } = getFiscalYearBounds(now, fiscalStartMonth);
+  const elapsedMonths = getElapsedFiscalMonths(now, fiscalStartMonth);
+
   const activeCategories = categories.filter((c) => !c.archived);
-  const chartData = activeCategories.map((c) => ({
-    name: c.name,
-    budget: c.monthlyBudget,
-    spent: computeMonthSpend(purchases, subscriptions, c.id, monthStart, monthEnd),
-  }));
+  const categoryRows = activeCategories.map((c) => {
+    const thisMonthSpend = computeMonthSpend(purchases, subscriptions, c.id, monthStart, monthEnd);
+    const ytdSpend = computeFiscalYtdSpend(purchases, subscriptions, c.id, fyStart, fyEnd, now);
+    return {
+      id: c.id,
+      name: c.name,
+      monthlyRemaining: computeThisMonthRemaining(c.monthlyBudget, thisMonthSpend),
+      fiscalYtdRemaining: computeFiscalYtdRemaining(c.monthlyBudget, elapsedMonths, ytdSpend),
+      yearlyRemaining: computeFullYearRemaining(c.monthlyBudget, ytdSpend),
+    };
+  });
 
   return (
     <div className="summary-page">
@@ -85,18 +100,33 @@ export function SummaryPage() {
         </div>
       </section>
 
-      <h2>This month: budget vs. spent by category</h2>
-      {chartData.length > 0 && (
-        <ResponsiveContainer width="100%" height={Math.max(200, chartData.length * 50)}>
-          <BarChart data={chartData} layout="vertical">
-            <XAxis type="number" />
-            <YAxis type="category" dataKey="name" width={120} />
-            <Tooltip formatter={(value) => formatMoney(Number(value))} />
-            <Bar dataKey="budget" fill="#B8912F" radius={[0, 3, 3, 0]} />
-            <Bar dataKey="spent" fill="#16302B" radius={[0, 3, 3, 0]} />
-          </BarChart>
-        </ResponsiveContainer>
-      )}
+      <h2>Remaining budget by category</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Category</th>
+            <th>Monthly remaining</th>
+            <th>Fiscal YTD remaining</th>
+            <th>Yearly remaining</th>
+          </tr>
+        </thead>
+        <tbody>
+          {categoryRows.map((row) => (
+            <tr key={row.id}>
+              <td>{row.name}</td>
+              <td>
+                <Money value={row.monthlyRemaining} />
+              </td>
+              <td>
+                <Money value={row.fiscalYtdRemaining} />
+              </td>
+              <td>
+                <Money value={row.yearlyRemaining} />
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
     </div>
   );
 }

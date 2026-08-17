@@ -6,9 +6,10 @@ interface Props {
   purchase: Purchase;
   categories?: BudgetCategory[];
   onUpdate: (id: string, updates: Partial<Purchase>) => void;
+  onDelete: (id: string) => void;
 }
 
-export function PurchaseRow({ purchase, categories, onUpdate }: Props) {
+export function PurchaseRow({ purchase, categories, onUpdate, onDelete }: Props) {
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState(purchase);
 
@@ -96,6 +97,17 @@ export function PurchaseRow({ purchase, categories, onUpdate }: Props) {
           />
           Cancelled
         </label>
+        {purchase.cancelled && (
+          <button
+            type="button"
+            className="btn-link btn-link-danger"
+            onClick={() => {
+              if (window.confirm('Permanently remove this purchase?')) onDelete(purchase.id);
+            }}
+          >
+            Remove
+          </button>
+        )}
       </td>
     </tr>
   );
