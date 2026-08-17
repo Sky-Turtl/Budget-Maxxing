@@ -67,8 +67,11 @@ export function PostTaxAllocationsPage() {
 
       <section>
         {fields.map(({ key, label }) => (
-          <label key={key}>
-            {label} ($/year)
+          <label key={key} className="field-row">
+            <span className="field-label">
+              {label}
+              <span className="field-unit">$/year</span>
+            </span>
             <input
               type="number"
               min={0}

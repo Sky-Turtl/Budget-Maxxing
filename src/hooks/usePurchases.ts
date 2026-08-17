@@ -24,7 +24,14 @@ export function usePurchases() {
 
   async function addPurchase(input: Omit<Purchase, 'id' | 'createdAt'>) {
     if (!user) return;
-    await addDoc(purchasesCollection(user.uid), { ...input, id: '', createdAt: Date.now() });
+    // Firestore rejects `undefined` field values, so drop notes entirely when empty.
+    const { notes, ...rest } = input;
+    await addDoc(purchasesCollection(user.uid), {
+      ...rest,
+      ...(notes ? { notes } : {}),
+      id: '',
+      createdAt: Date.now(),
+    });
   }
 
   return { purchases, loading, addPurchase };

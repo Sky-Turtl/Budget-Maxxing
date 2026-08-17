@@ -23,6 +23,13 @@
   --font-body: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
   --font-mono: 'IBM Plex Mono', ui-monospace, 'Courier New', monospace;
 
+  /* The nav bar is always a dark pine bar with ivory text, in both themes —
+     these are fixed, not swapped by prefers-color-scheme like --ink/--paper are. */
+  --nav-bg: #16302b;
+  --nav-text: #faf7f0;
+  --nav-text-muted: rgba(250, 247, 240, 0.82);
+  --nav-active: #eccb70;
+
   color-scheme: light dark;
 }
 
@@ -111,8 +118,8 @@ a {
   align-items: center;
   gap: 1.75rem;
   padding: 0.9rem 1.75rem;
-  background: var(--ink);
-  color: var(--paper);
+  background: var(--nav-bg);
+  color: var(--nav-text);
 }
 
 .navbar-brand {
@@ -121,7 +128,7 @@ a {
   font-style: italic;
   font-size: 1.15rem;
   letter-spacing: -0.01em;
-  color: var(--paper);
+  color: var(--nav-text);
 }
 
 .navbar-links {
@@ -132,7 +139,7 @@ a {
 }
 
 .navbar-links a {
-  color: rgba(250, 247, 240, 0.72);
+  color: var(--nav-text-muted);
   text-decoration: none;
   font-size: 0.88rem;
   font-weight: 500;
@@ -142,23 +149,23 @@ a {
 }
 
 .navbar-links a:hover {
-  color: var(--paper);
+  color: var(--nav-text);
 }
 
 .navbar-links a.active {
-  color: var(--paper);
-  border-bottom-color: var(--gold-strong);
+  color: var(--nav-text);
+  border-bottom-color: var(--nav-active);
 }
 
 .navbar button {
   background: transparent;
-  border: 1px solid rgba(250, 247, 240, 0.35);
-  color: var(--paper);
+  border: 1px solid rgba(250, 247, 240, 0.4);
+  color: var(--nav-text);
 }
 
 .navbar button:hover {
-  background: rgba(250, 247, 240, 0.1);
-  border-color: rgba(250, 247, 240, 0.6);
+  background: rgba(250, 247, 240, 0.12);
+  border-color: rgba(250, 247, 240, 0.65);
 }
 
 .page-content {
@@ -196,7 +203,7 @@ a {
   letter-spacing: 0.04em;
   display: flex;
   align-items: baseline;
-  gap: 0.5rem;
+  gap: 0.85rem;
   margin-bottom: 1.25rem;
 }
 
@@ -245,6 +252,18 @@ input[type='date'] {
   font-variant-numeric: tabular-nums;
 }
 
+/* Hide the browser's built-in up/down spinner arrows on number inputs. */
+input[type='number'] {
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+
+input[type='number']::-webkit-outer-spin-button,
+input[type='number']::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
 input:hover,
 select:hover {
   border-bottom-color: var(--ink-soft);
@@ -291,6 +310,37 @@ input[type='checkbox'] {
 .form-error {
   color: var(--rust-strong);
   font-size: 0.88rem;
+}
+
+/* A field laid out as its own row: label on the left, input on the right —
+   used where several related amounts are entered one after another. */
+label.field-row {
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.5rem;
+  padding: 0.7rem 0;
+  margin-bottom: 0;
+  border-bottom: 1px solid var(--rule);
+}
+
+.field-row .field-label {
+  font-size: 0.92rem;
+  font-weight: 500;
+  color: var(--ink);
+}
+
+.field-row .field-unit {
+  font-size: 0.76rem;
+  font-weight: 400;
+  color: var(--ink-faint);
+  margin-left: 0.4rem;
+}
+
+.field-row input {
+  width: 9rem;
+  text-align: right;
+  flex: none;
 }
 
 /* ---------- buttons ---------- */
@@ -373,7 +423,7 @@ button:disabled {
 .stat-block {
   display: flex;
   flex-direction: column;
-  gap: 0.2rem;
+  gap: 0.4rem;
 }
 
 .stat-block-wide {
@@ -407,7 +457,8 @@ button:disabled {
   display: flex;
   justify-content: space-between;
   align-items: baseline;
-  padding: 0.4rem 0;
+  gap: 1.5rem;
+  padding: 0.5rem 0;
   border-bottom: 1px dotted var(--rule);
   font-size: 0.9rem;
 }

@@ -29,7 +29,8 @@ export function useBudgetCategories() {
       id: '',
       name,
       monthlyBudget,
-      color,
+      // Firestore rejects `undefined` field values, so only include color when set.
+      ...(color ? { color } : {}),
       archived: false,
       createdAt: now,
       updatedAt: now,
