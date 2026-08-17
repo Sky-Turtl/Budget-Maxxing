@@ -175,7 +175,7 @@ a {
 
 .page-content {
   padding: 2rem 0.5rem 4rem;
-  max-width: 760px;
+  max-width: 960px;
   margin: 0 auto;
   width: 100%;
 }
@@ -598,6 +598,10 @@ th {
 td {
   padding: 0.5rem 0.6rem;
   border-bottom: 1px solid var(--rule);
+}
+
+.nowrap {
+  white-space: nowrap;
 }
 
 tbody tr:hover {

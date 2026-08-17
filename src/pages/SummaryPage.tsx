@@ -113,7 +113,7 @@ export function SummaryPage() {
         <tbody>
           {categoryRows.map((row) => (
             <tr key={row.id}>
-              <td>{row.name}</td>
+              <td className="nowrap">{row.name}</td>
               <td>
                 <Money value={row.monthlyRemaining} />
               </td>
