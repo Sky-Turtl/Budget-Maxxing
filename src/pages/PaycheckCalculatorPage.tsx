@@ -96,8 +96,11 @@ export function PaycheckCalculatorPage() {
 
       <section>
         <h2>Income</h2>
-        <label>
-          Pretax base pay ($/yr)
+        <label className="field-row">
+          <span className="field-label">
+            Pretax base pay
+            <span className="field-unit">$/yr</span>
+          </span>
           <input
             type="number"
             min={0}
@@ -106,8 +109,11 @@ export function PaycheckCalculatorPage() {
             onChange={(e) => update('pretaxBasePay', Number(e.target.value))}
           />
         </label>
-        <label>
-          Sign-on bonus ($)
+        <label className="field-row">
+          <span className="field-label">
+            Sign-on bonus
+            <span className="field-unit">$</span>
+          </span>
           <input
             type="number"
             min={0}
@@ -116,8 +122,11 @@ export function PaycheckCalculatorPage() {
             onChange={(e) => update('signOnBonus', Number(e.target.value))}
           />
         </label>
-        <label>
-          Relocation ($)
+        <label className="field-row">
+          <span className="field-label">
+            Relocation
+            <span className="field-unit">$</span>
+          </span>
           <input
             type="number"
             min={0}
@@ -126,8 +135,11 @@ export function PaycheckCalculatorPage() {
             onChange={(e) => update('relocation', Number(e.target.value))}
           />
         </label>
-        <label>
-          Other ($)
+        <label className="field-row">
+          <span className="field-label">
+            Other
+            <span className="field-unit">$</span>
+          </span>
           <input
             type="number"
             min={0}
