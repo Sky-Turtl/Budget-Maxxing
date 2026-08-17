@@ -68,6 +68,8 @@ export function SummaryPage() {
 
   const projectedMonthlyTakeHome = monthlyTakeHome - monthlyAllocatedSpending;
   const projectedAnnualTakeHome = annualTakeHome - annualAllocatedSpending;
+  const projectedMonthlyTakeHomeWithInvestments = projectedMonthlyTakeHome + monthlyInvested;
+  const projectedAnnualTakeHomeWithInvestments = projectedAnnualTakeHome + annualInvested;
 
   const now = new Date();
   const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
@@ -139,6 +141,14 @@ export function SummaryPage() {
         <div className="stat-block stat-block-wide">
           <span className="stat-label">Projected annual take-home after allocated spending</span>
           <Money className="stat-figure stat-figure-lg" value={projectedAnnualTakeHome} />
+        </div>
+        <div className="stat-block stat-block-wide">
+          <span className="stat-label">Projected monthly take-home after allocated spending (incl. investments)</span>
+          <Money className="stat-figure stat-figure-lg" value={projectedMonthlyTakeHomeWithInvestments} />
+        </div>
+        <div className="stat-block stat-block-wide">
+          <span className="stat-label">Projected annual take-home after allocated spending (incl. investments)</span>
+          <Money className="stat-figure stat-figure-lg" value={projectedAnnualTakeHomeWithInvestments} />
         </div>
       </section>
 
