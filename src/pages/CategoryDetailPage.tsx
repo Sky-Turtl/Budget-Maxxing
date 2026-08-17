@@ -11,6 +11,8 @@ import {
 } from '../domain/spending/categoryMetrics';
 import { getElapsedFiscalMonths, getFiscalYearBounds } from '../domain/spending/fiscalYear';
 import { formatMoney } from '../utils/money';
+import { Money } from '../components/Money';
+import { PageHeader } from '../components/layout/PageHeader';
 
 export function CategoryDetailPage() {
   const { categoryId } = useParams<{ categoryId: string }>();
@@ -52,18 +54,27 @@ export function CategoryDetailPage() {
 
   return (
     <div className="category-detail-page">
-      <h1>{category.name}</h1>
-      <p>Monthly budget: {formatMoney(category.monthlyBudget)}</p>
+      <PageHeader
+        title={category.name}
+        description="How this category is tracking against its budget — this month, cumulative since your fiscal year started, and against the full annual budget regardless of month."
+      />
+      <p className="eyebrow-line">
+        Monthly budget <Money value={category.monthlyBudget} />
+      </p>
 
-      <section className="results">
-        <h2>This month remaining</h2>
-        <p>{formatMoney(thisMonthRemaining)}</p>
-
-        <h2>Fiscal year-to-date remaining</h2>
-        <p>{formatMoney(fiscalYtdRemaining)}</p>
-
-        <h2>Full-year budget remaining</h2>
-        <p>{formatMoney(fullYearRemaining)}</p>
+      <section className="results stat-grid">
+        <div className="stat-block">
+          <span className="stat-label">This month remaining</span>
+          <Money className="stat-figure" value={thisMonthRemaining} />
+        </div>
+        <div className="stat-block">
+          <span className="stat-label">Fiscal year-to-date remaining</span>
+          <Money className="stat-figure" value={fiscalYtdRemaining} />
+        </div>
+        <div className="stat-block">
+          <span className="stat-label">Full-year budget remaining</span>
+          <Money className="stat-figure" value={fullYearRemaining} />
+        </div>
       </section>
 
       <h2>Purchase history</h2>

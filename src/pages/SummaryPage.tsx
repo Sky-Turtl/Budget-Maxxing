@@ -7,6 +7,8 @@ import { usePurchases } from '../hooks/usePurchases';
 import { computePaycheck } from '../domain/paycheck/computePaycheck';
 import { computeMonthSpend } from '../domain/spending/categoryMetrics';
 import { formatMoney } from '../utils/money';
+import { Money } from '../components/Money';
+import { PageHeader } from '../components/layout/PageHeader';
 
 export function SummaryPage() {
   const { config, loading: configLoading } = usePaycheckConfig();
@@ -28,7 +30,8 @@ export function SummaryPage() {
   if (!config) return <p>Fill out the Paycheck Calculator first.</p>;
 
   const paycheck = computePaycheck({ ...config, stateCode: profile.state });
-  const allocationsTotal = allocations
+  // Post-tax allocations are entered as annual $ amounts.
+  const allocationsAnnualTotal = allocations
     ? allocations.otherPersonalContributions +
       allocations.setAsideSavings +
       allocations.rothIRA +
@@ -36,10 +39,10 @@ export function SummaryPage() {
       allocations.debtPayments
     : 0;
 
-  const monthlyTakeHome = paycheck.netMonthly - allocationsTotal;
-  const annualTakeHome = monthlyTakeHome * 12;
-  const monthlyInvested = paycheck.total401k / 12 + (allocations?.rothIRA ?? 0);
-  const annualInvested = paycheck.total401k + (allocations?.rothIRA ?? 0) * 12;
+  const annualTakeHome = paycheck.netAnnual - allocationsAnnualTotal;
+  const monthlyTakeHome = annualTakeHome / 12;
+  const annualInvested = paycheck.total401k + (allocations?.rothIRA ?? 0);
+  const monthlyInvested = annualInvested / 12;
   const totalIncludingInvestments = annualTakeHome + annualInvested;
 
   const now = new Date();
@@ -54,19 +57,32 @@ export function SummaryPage() {
 
   return (
     <div className="summary-page">
-      <h1>Summary</h1>
+      <PageHeader
+        title="Summary"
+        description="The full picture — what you take home, what you're investing, and how this month's spending compares to budget across every category."
+      />
 
-      <section className="results">
-        <h2>Take-home</h2>
-        <p>Monthly: {formatMoney(monthlyTakeHome)}</p>
-        <p>Annual: {formatMoney(annualTakeHome)}</p>
-
-        <h2>Invested</h2>
-        <p>Monthly: {formatMoney(monthlyInvested)}</p>
-        <p>Annual: {formatMoney(annualInvested)}</p>
-
-        <h2>Total including investments</h2>
-        <p>{formatMoney(totalIncludingInvestments)}</p>
+      <section className="results stat-grid">
+        <div className="stat-block">
+          <span className="stat-label">Monthly take-home</span>
+          <Money className="stat-figure" value={monthlyTakeHome} />
+        </div>
+        <div className="stat-block">
+          <span className="stat-label">Annual take-home</span>
+          <Money className="stat-figure" value={annualTakeHome} />
+        </div>
+        <div className="stat-block">
+          <span className="stat-label">Monthly invested</span>
+          <Money className="stat-figure" value={monthlyInvested} />
+        </div>
+        <div className="stat-block">
+          <span className="stat-label">Annual invested</span>
+          <Money className="stat-figure" value={annualInvested} />
+        </div>
+        <div className="stat-block stat-block-wide">
+          <span className="stat-label">Total including investments</span>
+          <Money className="stat-figure stat-figure-lg" value={totalIncludingInvestments} />
+        </div>
       </section>
 
       <h2>This month: budget vs. spent by category</h2>
@@ -76,8 +92,8 @@ export function SummaryPage() {
             <XAxis type="number" />
             <YAxis type="category" dataKey="name" width={120} />
             <Tooltip formatter={(value) => formatMoney(Number(value))} />
-            <Bar dataKey="budget" fill="#8884d8" />
-            <Bar dataKey="spent" fill="#82ca9d" />
+            <Bar dataKey="budget" fill="#B8912F" radius={[0, 3, 3, 0]} />
+            <Bar dataKey="spent" fill="#16302B" radius={[0, 3, 3, 0]} />
           </BarChart>
         </ResponsiveContainer>
       )}

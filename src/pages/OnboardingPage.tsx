@@ -5,6 +5,7 @@ import { userProfileRef } from '../firebase/firestore';
 import { useAuth } from '../contexts/AuthContext';
 import { useUserProfile } from '../contexts/UserProfileContext';
 import { StatePicker } from '../components/forms/StatePicker';
+import { PageHeader } from '../components/layout/PageHeader';
 
 const MONTHS = [
   'January', 'February', 'March', 'April', 'May', 'June',
@@ -39,7 +40,10 @@ export function OnboardingPage() {
 
   return (
     <div className="onboarding-page">
-      <h1>Welcome — let's set up your budget</h1>
+      <PageHeader
+        title="Welcome — let's set up your budget"
+        description="A one-time setup: your state determines your income tax brackets, and your fiscal year start month anchors every monthly and year-to-date figure you'll see later."
+      />
       <form onSubmit={handleSubmit}>
         <label>
           Filing status

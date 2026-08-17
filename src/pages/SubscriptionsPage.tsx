@@ -2,6 +2,7 @@ import { useState, type FormEvent } from 'react';
 import { useSubscriptions } from '../hooks/useSubscriptions';
 import { useBudgetCategories } from '../hooks/useBudgetCategories';
 import { formatMoney } from '../utils/money';
+import { PageHeader } from '../components/layout/PageHeader';
 
 export function SubscriptionsPage() {
   const { subscriptions, loading, addSubscription, updateSubscription } = useSubscriptions();
@@ -25,13 +26,17 @@ export function SubscriptionsPage() {
 
   return (
     <div className="subscriptions-page">
-      <h1>Subscriptions</h1>
+      <PageHeader
+        title="Subscriptions"
+        description="Recurring charges you don't want to log by hand — each active subscription's monthly cost is folded automatically into its category's spending total on the day it bills."
+      />
 
       <form onSubmit={handleSubmit}>
         <input placeholder="Name" value={name} onChange={(e) => setName(e.target.value)} />
         <input
           type="number"
           min={0}
+          step={0.01}
           placeholder="Amount"
           value={amount || ''}
           onChange={(e) => setAmount(Number(e.target.value))}

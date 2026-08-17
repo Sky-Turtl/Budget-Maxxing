@@ -33,6 +33,11 @@ export function AuthPage() {
   return (
     <div className="auth-page">
       <h1>Budget-Maxxing</h1>
+      <p className="page-description">
+        {mode === 'login'
+          ? 'Log in to see your paycheck breakdown and spending, visible only to you.'
+          : 'Create an account — your budget data is private to you, tied to this login.'}
+      </p>
       <form onSubmit={handleSubmit}>
         <h2>{mode === 'login' ? 'Log in' : 'Sign up'}</h2>
         <label>

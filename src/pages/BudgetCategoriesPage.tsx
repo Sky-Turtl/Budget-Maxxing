@@ -2,6 +2,7 @@ import { useState, type FormEvent } from 'react';
 import { Link } from 'react-router-dom';
 import { useBudgetCategories } from '../hooks/useBudgetCategories';
 import { formatMoney } from '../utils/money';
+import { PageHeader } from '../components/layout/PageHeader';
 
 export function BudgetCategoriesPage() {
   const { categories, loading, addCategory, archiveCategory } = useBudgetCategories();
@@ -22,13 +23,17 @@ export function BudgetCategoriesPage() {
 
   return (
     <div className="categories-page">
-      <h1>Budget Categories</h1>
+      <PageHeader
+        title="Budget Categories"
+        description="The buckets your monthly spending gets tracked against — set a monthly budget for each, then open one to see what's left."
+      />
 
       <form onSubmit={handleSubmit}>
         <input placeholder="Category name" value={name} onChange={(e) => setName(e.target.value)} />
         <input
           type="number"
           min={0}
+          step={0.01}
           placeholder="Monthly budget"
           value={monthlyBudget || ''}
           onChange={(e) => setMonthlyBudget(Number(e.target.value))}
@@ -40,7 +45,9 @@ export function BudgetCategoriesPage() {
         {active.map((c) => (
           <li key={c.id}>
             <Link to={`/categories/${c.id}`}>{c.name}</Link> — {formatMoney(c.monthlyBudget)}/mo
-            <button onClick={() => archiveCategory(c.id)}>Archive</button>
+            <button className="btn btn-outline" onClick={() => archiveCategory(c.id)}>
+              Archive
+            </button>
           </li>
         ))}
       </ul>

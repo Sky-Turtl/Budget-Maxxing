@@ -5,7 +5,8 @@ import { computePaycheck } from '../domain/paycheck/computePaycheck';
 import { TAX_YEAR } from '../domain/tax/constants';
 import { getStateTaxEntry } from '../domain/tax/stateTaxData';
 import { TierEditor } from '../components/forms/TierEditor';
-import { formatMoney } from '../utils/money';
+import { Money } from '../components/Money';
+import { PageHeader } from '../components/layout/PageHeader';
 import type { ContributionInput, MatchTier, PaycheckConfig } from '../types/models';
 
 const DEFAULT_CONFIG: PaycheckConfig = {
@@ -36,6 +37,7 @@ function ContributionInputEditor({
         <input
           type="number"
           min={0}
+          step={0.01}
           value={value.value}
           onChange={(e) => onChange({ ...value, value: Number(e.target.value) })}
         />
@@ -87,7 +89,10 @@ export function PaycheckCalculatorPage() {
 
   return (
     <div className="paycheck-page">
-      <h1>Paycheck Calculator</h1>
+      <PageHeader
+        title="Paycheck Calculator"
+        description="Enter your gross pay and 401k setup to see FICA, federal, and state tax withholding, and what actually lands as net income."
+      />
 
       <section>
         <h2>Income</h2>
@@ -96,6 +101,7 @@ export function PaycheckCalculatorPage() {
           <input
             type="number"
             min={0}
+            step={0.01}
             value={form.pretaxBasePay}
             onChange={(e) => update('pretaxBasePay', Number(e.target.value))}
           />
@@ -105,6 +111,7 @@ export function PaycheckCalculatorPage() {
           <input
             type="number"
             min={0}
+            step={0.01}
             value={form.signOnBonus}
             onChange={(e) => update('signOnBonus', Number(e.target.value))}
           />
@@ -114,6 +121,7 @@ export function PaycheckCalculatorPage() {
           <input
             type="number"
             min={0}
+            step={0.01}
             value={form.relocation}
             onChange={(e) => update('relocation', Number(e.target.value))}
           />
@@ -123,6 +131,7 @@ export function PaycheckCalculatorPage() {
           <input
             type="number"
             min={0}
+            step={0.01}
             value={form.otherIncome}
             onChange={(e) => update('otherIncome', Number(e.target.value))}
           />
@@ -170,30 +179,66 @@ export function PaycheckCalculatorPage() {
 
       <section className="results">
         <h2>Pre-tax total (before federal/state tax)</h2>
-        <p>{formatMoney(result.federalTaxableIncome)}</p>
+        <p className="eyebrow-line">
+          <Money value={result.federalTaxableIncome} />
+        </p>
 
         <h2>Taxes</h2>
-        <ul>
-          <li>Social Security: {formatMoney(result.socialSecurityTax)}</li>
-          <li>Medicare: {formatMoney(result.medicareTax)}</li>
-          <li>Federal income tax: {formatMoney(result.federalTax)}</li>
-          <li>State income tax: {formatMoney(result.stateTax)}</li>
+        <ul className="ledger-list">
+          <li>
+            <span>Social Security</span>
+            <Money value={-result.socialSecurityTax} />
+          </li>
+          <li>
+            <span>Medicare</span>
+            <Money value={-result.medicareTax} />
+          </li>
+          <li>
+            <span>Federal income tax</span>
+            <Money value={-result.federalTax} />
+          </li>
+          <li>
+            <span>State income tax</span>
+            <Money value={-result.stateTax} />
+          </li>
         </ul>
 
         <h2>401k</h2>
-        <ul>
-          <li>Your traditional contribution: {formatMoney(result.employee401kTraditional)}</li>
-          <li>Your Roth contribution: {formatMoney(result.employee401kRoth)}</li>
-          <li>Employer match: {formatMoney(result.employerMatch401k)}</li>
-          <li>Total 401k: {formatMoney(result.total401k)}</li>
+        <ul className="ledger-list">
+          <li>
+            <span>Your traditional contribution</span>
+            <Money value={result.employee401kTraditional} />
+          </li>
+          <li>
+            <span>Your Roth contribution</span>
+            <Money value={result.employee401kRoth} />
+          </li>
+          <li>
+            <span>Employer match</span>
+            <Money value={result.employerMatch401k} />
+          </li>
+          <li>
+            <span>Total 401k</span>
+            <Money value={result.total401k} />
+          </li>
         </ul>
 
         <h2>Total income</h2>
-        <p>Annual net: {formatMoney(result.netAnnual)}</p>
-        <p>Monthly net: {formatMoney(result.netMonthly)}</p>
+        <div className="stat-grid">
+          <div className="stat-block">
+            <span className="stat-label">Annual net</span>
+            <Money className="stat-figure" value={result.netAnnual} />
+          </div>
+          <div className="stat-block">
+            <span className="stat-label">Monthly net</span>
+            <Money className="stat-figure" value={result.netMonthly} />
+          </div>
+        </div>
       </section>
 
-      <button onClick={handleSave}>Save</button>
+      <button className="btn btn-primary" onClick={handleSave}>
+        Save
+      </button>
     </div>
   );
 }

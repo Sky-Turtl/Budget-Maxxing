@@ -2,7 +2,8 @@ import { useEffect, useState } from 'react';
 import { usePostTaxAllocations, usePaycheckConfig } from '../hooks/usePaycheckConfig';
 import { useUserProfile } from '../contexts/UserProfileContext';
 import { computePaycheck } from '../domain/paycheck/computePaycheck';
-import { formatMoney } from '../utils/money';
+import { Money } from '../components/Money';
+import { PageHeader } from '../components/layout/PageHeader';
 import type { PostTaxAllocations } from '../types/models';
 
 const DEFAULT: PostTaxAllocations = {
@@ -26,16 +27,17 @@ export function PostTaxAllocationsPage() {
 
   if (loading) return <div className="page-loading">Loading…</div>;
 
-  const netMonthly = config
+  const netAnnual = config
     ? computePaycheck({
         ...config,
         stateCode: profile?.state ?? '',
-      }).netMonthly
+      }).netAnnual
     : 0;
 
   const totalAllocations =
     form.otherPersonalContributions + form.setAsideSavings + form.rothIRA + form.gifts + form.debtPayments;
-  const spendableMonthly = netMonthly - totalAllocations;
+  const spendableAnnual = netAnnual - totalAllocations;
+  const spendableMonthly = spendableAnnual / 12;
 
   function update<K extends keyof PostTaxAllocations>(key: K, value: PostTaxAllocations[K]) {
     setForm((f) => ({ ...f, [key]: value }));
@@ -55,16 +57,22 @@ export function PostTaxAllocationsPage() {
 
   return (
     <div className="allocations-page">
-      <h1>Post-Tax Allocations</h1>
-      <p>Monthly net income: {formatMoney(netMonthly)}</p>
+      <PageHeader
+        title="Post-Tax Allocations"
+        description="What comes out of your net income before it's yours to spend — savings, Roth IRA, gifts, debt payments. Enter each as an annual amount."
+      />
+      <p className="eyebrow-line">
+        Annual net income <Money value={netAnnual} />
+      </p>
 
       <section>
         {fields.map(({ key, label }) => (
           <label key={key}>
-            {label} ($/month)
+            {label} ($/year)
             <input
               type="number"
               min={0}
+              step={0.01}
               value={form[key]}
               onChange={(e) => update(key, Number(e.target.value))}
             />
@@ -73,11 +81,19 @@ export function PostTaxAllocationsPage() {
       </section>
 
       <section className="results">
-        <h2>Spendable monthly income</h2>
-        <p>{formatMoney(spendableMonthly)}</p>
+        <div className="stat-block">
+          <span className="stat-label">Spendable annual income</span>
+          <Money className="stat-figure" value={spendableAnnual} />
+        </div>
+        <div className="stat-block">
+          <span className="stat-label">Spendable monthly income</span>
+          <Money className="stat-figure" value={spendableMonthly} />
+        </div>
       </section>
 
-      <button onClick={handleSave}>Save</button>
+      <button className="btn btn-primary" onClick={handleSave}>
+        Save
+      </button>
     </div>
   );
 }

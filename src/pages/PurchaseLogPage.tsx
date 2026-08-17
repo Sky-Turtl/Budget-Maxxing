@@ -2,6 +2,7 @@ import { useState, type FormEvent } from 'react';
 import { usePurchases } from '../hooks/usePurchases';
 import { useBudgetCategories } from '../hooks/useBudgetCategories';
 import { formatMoney } from '../utils/money';
+import { PageHeader } from '../components/layout/PageHeader';
 
 function todayISO() {
   return new Date().toISOString().slice(0, 10);
@@ -32,7 +33,10 @@ export function PurchaseLogPage() {
 
   return (
     <div className="purchase-log-page">
-      <h1>Log a Purchase</h1>
+      <PageHeader
+        title="Log a Purchase"
+        description="Record what you spent, when, and where — it counts against that category's monthly and fiscal-year budget immediately."
+      />
 
       <form onSubmit={handleSubmit}>
         <label>
