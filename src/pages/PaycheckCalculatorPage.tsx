@@ -5,6 +5,7 @@ import { computePaycheck } from '../domain/paycheck/computePaycheck';
 import { TAX_YEAR } from '../domain/tax/constants';
 import { getStateTaxEntry } from '../domain/tax/stateTaxData';
 import { TierEditor } from '../components/forms/TierEditor';
+import { LineItemEditor } from '../components/forms/LineItemEditor';
 import { Money } from '../components/Money';
 import { PageHeader } from '../components/layout/PageHeader';
 import type { ContributionInput, MatchTier, PaycheckConfig } from '../types/models';
@@ -14,6 +15,7 @@ const DEFAULT_CONFIG: PaycheckConfig = {
   signOnBonus: 0,
   relocation: 0,
   otherIncome: 0,
+  extraIncome: [],
   employee401kTraditional: { mode: 'percent', value: 0 },
   employee401kRoth: { mode: 'percent', value: 0 },
   employerMatchTiers: [],
@@ -31,14 +33,15 @@ function ContributionInputEditor({
   onChange: (v: ContributionInput) => void;
 }) {
   return (
-    <label>
-      {label}
-      <div className="contribution-input">
+    <label className="field-row">
+      <span className="field-label">{label}</span>
+      <span className="contribution-input">
         <input
           type="number"
           min={0}
           step={0.01}
-          value={value.value}
+          placeholder="0"
+          value={value.value || ''}
           onChange={(e) => onChange({ ...value, value: Number(e.target.value) })}
         />
         <select
@@ -48,7 +51,7 @@ function ContributionInputEditor({
           <option value="percent">% of base pay</option>
           <option value="dollar">$ / year</option>
         </select>
-      </div>
+      </span>
     </label>
   );
 }
@@ -60,18 +63,20 @@ export function PaycheckCalculatorPage() {
   const [manualStateRate, setManualStateRate] = useState(0);
 
   useEffect(() => {
-    if (config) setForm(config);
+    if (config) setForm({ ...DEFAULT_CONFIG, ...config });
   }, [config]);
 
   if (loading) return <div className="page-loading">Loading…</div>;
 
   const stateEntry = profile ? getStateTaxEntry(profile.state) : { type: 'unsupported' as const };
 
+  const extraIncomeTotal = form.extraIncome.reduce((sum, item) => sum + item.amount, 0);
+
   const result = computePaycheck({
     pretaxBasePay: form.pretaxBasePay,
     signOnBonus: form.signOnBonus,
     relocation: form.relocation,
-    otherIncome: form.otherIncome,
+    otherIncome: form.otherIncome + extraIncomeTotal,
     employee401kTraditional: form.employee401kTraditional,
     employee401kRoth: form.employee401kRoth,
     employerMatchTiers: form.employerMatchTiers,
@@ -152,6 +157,12 @@ export function PaycheckCalculatorPage() {
             onChange={(e) => update('otherIncome', Number(e.target.value))}
           />
         </label>
+        <LineItemEditor
+          items={form.extraIncome}
+          onChange={(items) => update('extraIncome', items)}
+          unit="$/yr"
+          addLabel="+ Add income source"
+        />
       </section>
 
       <section>

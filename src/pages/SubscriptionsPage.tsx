@@ -18,8 +18,14 @@ export function SubscriptionsPage() {
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
-    if (!name || amount <= 0 || !categoryId) return;
-    await addSubscription({ name, amount, billingDate, categoryId, active: true });
+    if (!name || amount <= 0) return;
+    await addSubscription({
+      name,
+      amount,
+      billingDate,
+      active: true,
+      ...(categoryId ? { categoryId } : {}),
+    });
     setName('');
     setAmount(0);
   }
@@ -57,11 +63,9 @@ export function SubscriptionsPage() {
           />
         </label>
         <label>
-          Category
+          Category (optional)
           <select value={categoryId} onChange={(e) => setCategoryId(e.target.value)}>
-            <option value="" disabled>
-              Select
-            </option>
+            <option value="">None</option>
             {activeCategories.map((c) => (
               <option key={c.id} value={c.id}>
                 {c.name}
@@ -76,7 +80,7 @@ export function SubscriptionsPage() {
         {subscriptions.map((s) => (
           <li key={s.id}>
             {s.name} — {formatMoney(s.amount)}/mo, billed day {s.billingDate} —{' '}
-            {categories.find((c) => c.id === s.categoryId)?.name ?? 'Unknown category'}
+            {s.categoryId ? categories.find((c) => c.id === s.categoryId)?.name ?? 'Unknown category' : 'No category'}
             <label>
               <input
                 type="checkbox"

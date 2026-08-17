@@ -214,16 +214,18 @@ a {
 
 /* ---------- sections / panels ---------- */
 
-section {
-  margin-bottom: 1rem;
-}
-
 .results {
   background: var(--paper-raised);
   border: 1px solid var(--rule);
   border-radius: 8px;
   padding: 1.25rem 1.5rem 1.5rem;
-  margin-top: 1rem;
+  margin: 1.75rem 0;
+}
+
+.results > h1:first-child,
+.results > h2:first-child,
+.results > h3:first-child {
+  padding-top: 0;
 }
 
 /* ---------- forms ---------- */
@@ -326,7 +328,7 @@ input[type='checkbox'] {
 
 /* A field laid out as its own row: label on the left, input on the right —
    used where several related amounts are entered one after another. */
-label.field-row {
+.field-row {
   display: flex;
   flex-direction: row;
   align-items: center;
@@ -335,6 +337,30 @@ label.field-row {
   padding: 0.7rem 0;
   margin-bottom: 0;
   width: 100%;
+}
+
+.line-item-row .line-item-label {
+  field-sizing: content;
+  min-width: 8ch;
+}
+
+.line-item-remove {
+  margin-left: auto;
+  background: transparent;
+  border: none;
+  color: var(--ink-faint);
+  font-size: 1.1rem;
+  line-height: 1;
+  padding: 0.2rem 0.4rem;
+  cursor: pointer;
+}
+
+.line-item-remove:hover {
+  color: var(--rust-strong);
+}
+
+.btn-add-item {
+  margin-top: 0.5rem;
 }
 
 .field-row .field-label {
