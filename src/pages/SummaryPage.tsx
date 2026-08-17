@@ -18,6 +18,7 @@ import { PageHeader } from '../components/layout/PageHeader';
 
 export function SummaryPage() {
   const [includeInvestments, setIncludeInvestments] = useState(false);
+  const [excludedCategoryIds, setExcludedCategoryIds] = useState<Set<string>>(new Set());
   const { config, loading: configLoading } = usePaycheckConfig();
   const { allocations, loading: allocationsLoading } = usePostTaxAllocations();
   const { profile, loading: profileLoading } = useUserProfile();
@@ -93,6 +94,18 @@ export function SummaryPage() {
     };
   });
   const totalSpentThisMonth = categoryRows.reduce((sum, row) => sum + row.thisMonthSpend, 0);
+  const selectedTotalSpentThisMonth = categoryRows
+    .filter((row) => !excludedCategoryIds.has(row.id))
+    .reduce((sum, row) => sum + row.thisMonthSpend, 0);
+
+  function toggleCategoryIncluded(categoryId: string) {
+    setExcludedCategoryIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(categoryId)) next.delete(categoryId);
+      else next.add(categoryId);
+      return next;
+    });
+  }
 
   return (
     <div className="summary-page">
@@ -199,16 +212,25 @@ export function SummaryPage() {
       </table>
 
       <h2>Amount spent this month so far</h2>
+      <p className="page-description">Uncheck a category to leave it out of the selected total below — e.g. rent and utilities.</p>
       <table>
         <thead>
           <tr>
+            <th></th>
             <th>Category</th>
             <th>Spent this month</th>
           </tr>
         </thead>
         <tbody>
           {categoryRows.map((row) => (
-            <tr key={row.id}>
+            <tr key={row.id} className={excludedCategoryIds.has(row.id) ? 'purchase-cancelled' : undefined}>
+              <td>
+                <input
+                  type="checkbox"
+                  checked={!excludedCategoryIds.has(row.id)}
+                  onChange={() => toggleCategoryIncluded(row.id)}
+                />
+              </td>
               <td className="nowrap">{row.name}</td>
               <td>
                 <Money value={-row.thisMonthSpend} />
@@ -216,11 +238,21 @@ export function SummaryPage() {
             </tr>
           ))}
           <tr>
+            <td></td>
             <td className="nowrap">
               <strong>Total</strong>
             </td>
             <td>
               <Money value={-totalSpentThisMonth} />
+            </td>
+          </tr>
+          <tr>
+            <td></td>
+            <td className="nowrap">
+              <strong>Selected total</strong>
+            </td>
+            <td>
+              <Money value={-selectedTotalSpentThisMonth} />
             </td>
           </tr>
         </tbody>
