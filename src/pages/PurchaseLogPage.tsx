@@ -16,11 +16,18 @@ export function PurchaseLogPage() {
   const [categoryId, setCategoryId] = useState('');
   const [location, setLocation] = useState('');
   const [notes, setNotes] = useState('');
+  const [sortDir, setSortDir] = useState<'desc' | 'asc'>('desc');
 
   if (loading) return <div className="page-loading">Loading…</div>;
 
   const activeCategories = categories.filter((c) => !c.archived);
-  const recent = [...purchases].sort((a, b) => (a.date < b.date ? 1 : -1)).slice(0, 20);
+  const sign = sortDir === 'desc' ? -1 : 1;
+  const recent = [...purchases]
+    .sort((a, b) => {
+      if (a.date !== b.date) return a.date < b.date ? -sign : sign;
+      return a.createdAt < b.createdAt ? -sign : sign;
+    })
+    .slice(0, 20);
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
@@ -86,7 +93,15 @@ export function PurchaseLogPage() {
       <table>
         <thead>
           <tr>
-            <th>Date</th>
+            <th>
+              <button
+                type="button"
+                className="th-sort"
+                onClick={() => setSortDir((d) => (d === 'desc' ? 'asc' : 'desc'))}
+              >
+                Date {sortDir === 'desc' ? '↓' : '↑'}
+              </button>
+            </th>
             <th>Amount</th>
             <th>Category</th>
             <th>Location</th>

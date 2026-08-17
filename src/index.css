@@ -579,6 +579,22 @@ th {
   border-bottom: 1.5px solid var(--rule-strong);
 }
 
+.th-sort {
+  background: transparent;
+  border: none;
+  color: inherit;
+  font: inherit;
+  text-transform: inherit;
+  letter-spacing: inherit;
+  padding: 0;
+  cursor: pointer;
+}
+
+.th-sort:hover {
+  color: var(--ink);
+  opacity: 1;
+}
+
 td {
   padding: 0.5rem 0.6rem;
   border-bottom: 1px solid var(--rule);
