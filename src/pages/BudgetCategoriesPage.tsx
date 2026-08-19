@@ -5,7 +5,7 @@ import { formatMoney } from '../utils/money';
 import { PageHeader } from '../components/layout/PageHeader';
 
 export function BudgetCategoriesPage() {
-  const { categories, loading, addCategory, archiveCategory } = useBudgetCategories();
+  const { categories, loading, addCategory, deleteCategory } = useBudgetCategories();
   const [name, setName] = useState('');
   const [monthlyBudget, setMonthlyBudget] = useState(0);
 
@@ -50,8 +50,13 @@ export function BudgetCategoriesPage() {
         {active.map((c) => (
           <li key={c.id}>
             <Link to={`/categories/${c.id}`}>{c.name}</Link> — {formatMoney(c.monthlyBudget)}/mo
-            <button className="btn btn-outline" onClick={() => archiveCategory(c.id)}>
-              Archive
+            <button
+              className="btn btn-outline"
+              onClick={() => {
+                if (window.confirm(`Permanently delete "${c.name}"? This can't be undone.`)) deleteCategory(c.id);
+              }}
+            >
+              Delete
             </button>
           </li>
         ))}

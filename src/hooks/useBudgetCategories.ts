@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { onSnapshot, addDoc, updateDoc } from 'firebase/firestore';
+import { onSnapshot, addDoc, updateDoc, deleteDoc } from 'firebase/firestore';
 import { budgetCategoriesCollection, budgetCategoryRef } from '../firebase/firestore';
 import type { BudgetCategory } from '../types/models';
 import { useAuth } from '../contexts/AuthContext';
@@ -17,8 +17,14 @@ export function useBudgetCategories() {
     }
     setLoading(true);
     return onSnapshot(budgetCategoriesCollection(user.uid), (snap) => {
-      setCategories(snap.docs.map((d) => ({ ...d.data(), id: d.id })));
+      const docs = snap.docs.map((d) => ({ ...d.data(), id: d.id }));
+      setCategories(docs);
       setLoading(false);
+      // Categories archived under the old flow are now deleted outright — sweep them
+      // once so "archived" no longer lingers as a hidden state.
+      for (const c of docs) {
+        if (c.archived) deleteDoc(budgetCategoryRef(user.uid, c.id));
+      }
     });
   }, [user]);
 
@@ -45,9 +51,10 @@ export function useBudgetCategories() {
     });
   }
 
-  async function archiveCategory(categoryId: string) {
-    await updateCategory(categoryId, { archived: true });
+  async function deleteCategory(categoryId: string) {
+    if (!user) return;
+    await deleteDoc(budgetCategoryRef(user.uid, categoryId));
   }
 
-  return { categories, loading, addCategory, updateCategory, archiveCategory };
+  return { categories, loading, addCategory, updateCategory, deleteCategory };
 }
