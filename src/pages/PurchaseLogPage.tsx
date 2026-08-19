@@ -8,6 +8,8 @@ function todayISO() {
   return new Date().toISOString().slice(0, 10);
 }
 
+const PAGE_SIZE = 20;
+
 export function PurchaseLogPage() {
   const { purchases, loading, addPurchase, updatePurchase, deletePurchase } = usePurchases();
   const { categories } = useBudgetCategories();
@@ -17,17 +19,19 @@ export function PurchaseLogPage() {
   const [location, setLocation] = useState('');
   const [notes, setNotes] = useState('');
   const [sortDir, setSortDir] = useState<'desc' | 'asc'>('desc');
+  const [page, setPage] = useState(0);
 
   if (loading) return <div className="page-loading">Loading…</div>;
 
   const activeCategories = categories.filter((c) => !c.archived);
   const sign = sortDir === 'desc' ? -1 : 1;
-  const recent = [...purchases]
-    .sort((a, b) => {
-      if (a.date !== b.date) return a.date < b.date ? -sign : sign;
-      return a.createdAt < b.createdAt ? -sign : sign;
-    })
-    .slice(0, 20);
+  const sorted = [...purchases].sort((a, b) => {
+    if (a.date !== b.date) return a.date < b.date ? -sign : sign;
+    return a.createdAt < b.createdAt ? -sign : sign;
+  });
+  const pageCount = Math.max(1, Math.ceil(sorted.length / PAGE_SIZE));
+  const currentPage = Math.min(page, pageCount - 1);
+  const pageItems = sorted.slice(currentPage * PAGE_SIZE, currentPage * PAGE_SIZE + PAGE_SIZE);
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
@@ -89,7 +93,7 @@ export function PurchaseLogPage() {
         <button type="submit">Log purchase</button>
       </form>
 
-      <h2>Recent purchases</h2>
+      <h2>All purchases</h2>
       <table>
         <thead>
           <tr>
@@ -97,7 +101,10 @@ export function PurchaseLogPage() {
               <button
                 type="button"
                 className="th-sort"
-                onClick={() => setSortDir((d) => (d === 'desc' ? 'asc' : 'desc'))}
+                onClick={() => {
+                  setSortDir((d) => (d === 'desc' ? 'asc' : 'desc'));
+                  setPage(0);
+                }}
               >
                 Date {sortDir === 'desc' ? '↓' : '↑'}
               </button>
@@ -110,7 +117,7 @@ export function PurchaseLogPage() {
           </tr>
         </thead>
         <tbody>
-          {recent.map((p) => (
+          {pageItems.map((p) => (
             <PurchaseRow
               key={p.id}
               purchase={p}
@@ -121,6 +128,28 @@ export function PurchaseLogPage() {
           ))}
         </tbody>
       </table>
+
+      <div className="pager">
+        <button
+          type="button"
+          className="btn btn-outline"
+          disabled={currentPage === 0}
+          onClick={() => setPage(currentPage - 1)}
+        >
+          Previous page
+        </button>
+        <span className="pager-status">
+          Page {currentPage + 1} of {pageCount}
+        </span>
+        <button
+          type="button"
+          className="btn btn-outline"
+          disabled={currentPage >= pageCount - 1}
+          onClick={() => setPage(currentPage + 1)}
+        >
+          Next page
+        </button>
+      </div>
     </div>
   );
 }

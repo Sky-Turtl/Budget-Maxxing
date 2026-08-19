@@ -50,6 +50,7 @@ export function PurchaseRow({ purchase, categories, onUpdate, onDelete }: Props)
               value={draft.categoryId}
               onChange={(e) => setDraft({ ...draft, categoryId: e.target.value })}
             >
+              {!categories.some((c) => c.id === draft.categoryId) && <option value={draft.categoryId}>?</option>}
               {categories.map((c) => (
                 <option key={c.id} value={c.id}>
                   {c.name}
@@ -81,7 +82,7 @@ export function PurchaseRow({ purchase, categories, onUpdate, onDelete }: Props)
       <td>{purchase.date}</td>
       <td>{formatMoney(purchase.amount)}</td>
       {categories && (
-        <td>{categories.find((c) => c.id === purchase.categoryId)?.name ?? 'Unknown'}</td>
+        <td>{categories.find((c) => c.id === purchase.categoryId)?.name ?? '?'}</td>
       )}
       <td>{purchase.location}</td>
       <td className="notes-cell">

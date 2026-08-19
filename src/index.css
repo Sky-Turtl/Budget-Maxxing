@@ -469,6 +469,19 @@ button:disabled {
   padding: 0.25rem 0.6rem;
 }
 
+.pager {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.pager-status {
+  font-size: 0.85rem;
+  color: var(--ink-soft);
+}
+
 td input,
 td select {
   font-size: 0.86rem;
