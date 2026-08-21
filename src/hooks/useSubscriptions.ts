@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { onSnapshot, addDoc, updateDoc } from 'firebase/firestore';
+import { onSnapshot, addDoc, updateDoc, deleteDoc } from 'firebase/firestore';
 import { subscriptionsCollection, subscriptionRef } from '../firebase/firestore';
 import type { Subscription } from '../types/models';
 import { useAuth } from '../contexts/AuthContext';
@@ -33,5 +33,10 @@ export function useSubscriptions() {
     await updateDoc(subscriptionRef(user.uid, subscriptionId), { ...updates, updatedAt: Date.now() });
   }
 
-  return { subscriptions, loading, addSubscription, updateSubscription };
+  async function deleteSubscription(subscriptionId: string) {
+    if (!user) return;
+    await deleteDoc(subscriptionRef(user.uid, subscriptionId));
+  }
+
+  return { subscriptions, loading, addSubscription, updateSubscription, deleteSubscription };
 }
