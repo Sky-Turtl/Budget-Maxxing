@@ -1,11 +1,10 @@
 import { useState, type FormEvent } from 'react';
-import { Link } from 'react-router-dom';
 import { useBudgetCategories } from '../hooks/useBudgetCategories';
-import { formatMoney } from '../utils/money';
 import { PageHeader } from '../components/layout/PageHeader';
+import { CategoryRow } from '../components/CategoryRow';
 
 export function BudgetCategoriesPage() {
-  const { categories, loading, addCategory, deleteCategory } = useBudgetCategories();
+  const { categories, loading, addCategory, updateCategory, deleteCategory } = useBudgetCategories();
   const [name, setName] = useState('');
   const [monthlyBudget, setMonthlyBudget] = useState(0);
 
@@ -48,17 +47,7 @@ export function BudgetCategoriesPage() {
 
       <ul className="category-list">
         {active.map((c) => (
-          <li key={c.id}>
-            <Link to={`/categories/${c.id}`}>{c.name}</Link> — {formatMoney(c.monthlyBudget)}/mo
-            <button
-              className="btn btn-outline"
-              onClick={() => {
-                if (window.confirm(`Permanently delete "${c.name}"? This can't be undone.`)) deleteCategory(c.id);
-              }}
-            >
-              Delete
-            </button>
-          </li>
+          <CategoryRow key={c.id} category={c} onUpdate={updateCategory} onDelete={deleteCategory} />
         ))}
       </ul>
     </div>
