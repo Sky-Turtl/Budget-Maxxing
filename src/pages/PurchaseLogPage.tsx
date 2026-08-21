@@ -4,8 +4,17 @@ import { useBudgetCategories } from '../hooks/useBudgetCategories';
 import { PageHeader } from '../components/layout/PageHeader';
 import { PurchaseRow } from '../components/PurchaseRow';
 
+/**
+ * Default log date, in local time — rolls over at 8am rather than midnight, so
+ * logging something at 1am still defaults to "yesterday" until the next morning.
+ */
 function todayISO() {
-  return new Date().toISOString().slice(0, 10);
+  const now = new Date();
+  if (now.getHours() < 8) now.setDate(now.getDate() - 1);
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, '0');
+  const day = String(now.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
 }
 
 const PAGE_SIZE = 20;
