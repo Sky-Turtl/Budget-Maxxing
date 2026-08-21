@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { onSnapshot, addDoc, updateDoc, deleteDoc } from 'firebase/firestore';
+import { onSnapshot, addDoc, updateDoc, deleteDoc, deleteField } from 'firebase/firestore';
 import { subscriptionsCollection, subscriptionRef } from '../firebase/firestore';
 import type { Subscription } from '../types/models';
 import { useAuth } from '../contexts/AuthContext';
@@ -30,7 +30,12 @@ export function useSubscriptions() {
 
   async function updateSubscription(subscriptionId: string, updates: Partial<Subscription>) {
     if (!user) return;
-    await updateDoc(subscriptionRef(user.uid, subscriptionId), { ...updates, updatedAt: Date.now() });
+    // Firestore rejects `undefined` field values (and fails the whole update), so
+    // translate an explicit `undefined` into a field deletion instead.
+    const sanitized = Object.fromEntries(
+      Object.entries(updates).map(([key, value]) => [key, value === undefined ? deleteField() : value])
+    );
+    await updateDoc(subscriptionRef(user.uid, subscriptionId), { ...sanitized, updatedAt: Date.now() });
   }
 
   async function deleteSubscription(subscriptionId: string) {
